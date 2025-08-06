@@ -120,8 +120,7 @@ const CallToActionSection = () => {
               </Link>
               <Link to="/how-it-works">
                 <Button
-                  variant="outline"
-                  className="border-white text-white hover:bg-white hover:text-primary px-8 py-4 text-lg"
+                  className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-primary px-8 py-4 text-lg font-semibold"
                 >
                   Learn More
                 </Button>
