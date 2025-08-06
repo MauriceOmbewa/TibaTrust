@@ -31,7 +31,7 @@ const Navbar = () => {
                 <Heart className="w-5 h-5 text-primary" />
               </div>
               <span className="text-xl font-bold text-primary-foreground">
-                Afya Chain
+                BimaBora
               </span>
             </div>
           </Link>
