@@ -49,7 +49,7 @@ const FeaturesSection = () => {
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-            How Afya Chain Works
+            How BimaBora Works
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Our platform combines blockchain technology with community support to provide 
@@ -74,7 +74,7 @@ const FeaturesSection = () => {
                   <h3 className="text-xl font-semibold text-foreground mb-3 group-hover:text-primary transition-smooth">
                     {feature.title}
                   </h3>
-                  <p className="text-muted-foreground mb-4 leading-relaxed">
+                  <p className="text-foreground/70 mb-4 leading-relaxed">
                     {feature.description}
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -97,7 +97,7 @@ const FeaturesSection = () => {
         <div className="bg-gradient-card rounded-2xl p-8 shadow-card border border-highlight/20">
           <div className="text-center mb-8">
             <h3 className="text-2xl font-bold text-foreground mb-2">Platform Impact</h3>
-            <p className="text-muted-foreground">Real numbers showing our community's success</p>
+            <p className="text-foreground/70">Real numbers showing our community's success</p>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -109,7 +109,7 @@ const FeaturesSection = () => {
                 <div className="text-2xl font-bold text-primary counter-animate">
                   {stat.value}
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-foreground/70">
                   {stat.label}
                 </div>
               </div>
