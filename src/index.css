@@ -21,7 +21,7 @@ All colors MUST be HSL.
     --accent-foreground: 0 0% 100%;
     
     --muted: 168 52% 46%;          /* #3DAE96 - Midtone */
-    --muted-foreground: 0 0% 100%;
+    --muted-foreground: 168 85% 10%;
     
     --background: 0 0% 100%;       /* White */
     --foreground: 168 85% 10%;     /* Primary text */
