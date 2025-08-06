@@ -45,10 +45,12 @@ const HeroSection = () => {
                 </Button>
               </Link>
               <Link to="/donate">
+              {/* <Button className="btn-outline text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary"> */}
                 <Button className="btn-outline">
                   Donate Now
                 </Button>
               </Link>
+              {/* <Button variant="ghost" className="text-primary-foreground hover:bg-white/10 hover:text-primary group"> */}
               <Button variant="ghost" className="text-primary-foreground hover:bg-white/10 group">
                 <Play className="w-5 h-5 mr-2" />
                 Watch How It Works
