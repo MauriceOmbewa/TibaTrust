@@ -106,7 +106,7 @@ const TestimonialsSection = () => {
               </Button>
             </Link>
             <Link to="/donate">
-              <Button variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
+              <Button className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-primary px-8 py-3 font-semibold">
                 Support Others
               </Button>
             </Link>
