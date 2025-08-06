@@ -108,7 +108,7 @@ const CallToActionSection = () => {
             </h3>
             <p className="text-primary-foreground/90 mb-6 leading-relaxed">
               Don't let financial barriers prevent you from accessing quality healthcare. 
-              Join Afya Chain today and be part of a community that believes in 
+              Join BimaBora today and be part of a community that believes in 
               affordable, accessible healthcare for all Kenyans.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
