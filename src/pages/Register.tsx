@@ -188,7 +188,7 @@ const Register = () => {
                   </div>
                   
                   <div className="pt-4 flex justify-between">
-                    <Button onClick={handlePrevStep} variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
+                    <Button onClick={handlePrevStep} className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-primary">
                       Back
                     </Button>
                     <Button onClick={handleNextStep} className="bg-white text-primary hover:bg-highlight hover:text-primary">
@@ -248,7 +248,7 @@ const Register = () => {
                   </div>
                   
                   <div className="pt-4 flex justify-between">
-                    <Button onClick={handlePrevStep} variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
+                    <Button onClick={handlePrevStep} className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-primary">
                       Back
                     </Button>
                     <Button className="bg-white text-primary hover:bg-highlight hover:text-primary">
@@ -276,7 +276,7 @@ const Register = () => {
                 <div className="text-center">
                   <div className="text-sm text-primary-foreground/80 mb-2">Already have an account?</div>
                   <Link to="/login">
-                    <Button variant="outline" className="w-full border-white text-white hover:bg-white hover:text-primary">
+                    <Button className="w-full border-2 border-white text-white bg-transparent hover:bg-white hover:text-primary">
                       Sign In
                     </Button>
                   </Link>
