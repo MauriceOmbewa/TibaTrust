@@ -1,19 +1,22 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Heart, Shield, Languages } from 'lucide-react';
+import { Menu, X, Heart, Languages, User, LogOut } from 'lucide-react';
+import { useApp } from '@/contexts/AppContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [language, setLanguage] = useState('en');
+  const { user, logout } = useApp();
+  const { language, setLanguage, t } = useLanguage();
 
   const navLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'How It Works', href: '/how-it-works' },
-    { name: 'Insurance Plans', href: '/insurance' },
-    { name: 'Donate', href: '/donate' },
-    { name: 'About', href: '/about' },
-    { name: 'Contact', href: '/contact' },
+    { name: t('nav.home'), href: '/' },
+    { name: t('nav.howItWorks'), href: '/how-it-works' },
+    { name: t('nav.insurance'), href: '/insurance' },
+    { name: t('nav.donate'), href: '/donate' },
+    { name: t('nav.about'), href: '/about' },
+    { name: t('nav.contact'), href: '/contact' },
   ];
 
   const toggleLanguage = () => {
@@ -62,16 +65,36 @@ const Navbar = () => {
               <Languages className="w-4 h-4 mr-2" />
               {language === 'en' ? 'SW' : 'EN'}
             </Button>
-            <Link to="/login">
-              <Button variant="secondary" size="sm">
-                Login
-              </Button>
-            </Link>
-            <Link to="/register">
-              <Button className="btn-hero">
-                Join Now
-              </Button>
-            </Link>
+            {user ? (
+              <div className="flex items-center space-x-3">
+                <Link to="/dashboard" className="flex items-center space-x-2 text-primary-foreground hover:text-highlight">
+                  <User className="w-4 h-4" />
+                  <span className="text-sm">{user.firstName}</span>
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={logout}
+                  className="text-primary-foreground hover:bg-secondary"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  {t('nav.logout')}
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="secondary" size="sm">
+                    {t('nav.login')}
+                  </Button>
+                </Link>
+                <Link to="/register">
+                  <Button className="btn-hero">
+                    {t('nav.joinNow')}
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -112,16 +135,42 @@ const Navbar = () => {
                   <Languages className="w-4 h-4 mr-2" />
                   Switch to {language === 'en' ? 'Swahili' : 'English'}
                 </Button>
-                <Link to="/login" onClick={() => setIsOpen(false)}>
-                  <Button variant="outline" className="w-full">
-                    Login
-                  </Button>
-                </Link>
-                <Link to="/register" onClick={() => setIsOpen(false)}>
-                  <Button className="btn-hero w-full">
-                    Join Now
-                  </Button>
-                </Link>
+                {user ? (
+                  <>
+                    <Link 
+                      to="/dashboard" 
+                      className="flex items-center space-x-2 px-3 py-2 text-secondary-foreground hover:text-primary"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <User className="w-4 h-4" />
+                      <span>{user.firstName} {user.lastName}</span>
+                    </Link>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        logout();
+                        setIsOpen(false);
+                      }}
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      {t('nav.logout')}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/login" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full">
+                        {t('nav.login')}
+                      </Button>
+                    </Link>
+                    <Link to="/register" onClick={() => setIsOpen(false)}>
+                      <Button className="btn-hero w-full">
+                        {t('nav.joinNow')}
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>
