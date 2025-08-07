@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { VideoModal } from '@/components/ui/video-modal';
 import { ArrowRight, Play, Shield, Users, Heart } from 'lucide-react';
 import heroImage from '@/assets/healthcare-hero.jpg';
 
@@ -51,10 +52,15 @@ const HeroSection = () => {
                 </Button>
               </Link>
               {/* <Button variant="ghost" className="text-primary-foreground hover:bg-white/10 hover:text-primary group"> */}
-              <Button variant="ghost" className="text-primary-foreground hover:bg-white/10 group">
-                <Play className="w-5 h-5 mr-2" />
-                Watch How It Works
-              </Button>
+              <VideoModal
+                trigger={
+                  <Button variant="ghost" className="text-primary-foreground hover:bg-white/10 group">
+                    <Play className="w-5 h-5 mr-2" />
+                    Watch How It Works
+                  </Button>
+                }
+                title="How BimaBora Healthcare Platform Works"
+              />
             </div>
             
             {/* Stats */}
