@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Heart, Users, ArrowRight, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
+import { MpesaPayment } from '@/components/payment/MpesaPayment';
 
 const Donate = () => {
   const [donationAmount, setDonationAmount] = useState<string>('1000');
@@ -169,23 +170,11 @@ const Donate = () => {
                 </div>
               </div>
               
-              <Button 
-                className="btn-hero w-full"
-                onClick={handleDonate}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    Donate Now
-                    <Heart className="w-5 h-5 ml-2" />
-                  </>
-                )}
-              </Button>
+              <MpesaPayment
+                amount={parseInt(donationAmount === 'custom' ? customAmount : donationAmount) || 0}
+                description="Donation to BimaBora Healthcare"
+                onSuccess={handleDonate}
+              />
               
               <p className="text-sm text-muted-foreground mt-4 text-center">
                 100% of your donation goes directly to patient care. All transactions are recorded on the blockchain.
