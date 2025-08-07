@@ -1,8 +1,23 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Heart, ArrowRight } from 'lucide-react';
+import { Heart, ArrowRight, Loader2 } from 'lucide-react';
+import { useApp } from '@/contexts/AppContext';
+import { useState } from 'react';
 
 const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+  const { login, isLoading } = useApp();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const success = await login(email, password);
+    if (success) {
+      navigate('/');
+    }
+  };
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-secondary/80" />
@@ -26,7 +41,7 @@ const Login = () => {
         
         {/* Login Form */}
         <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 shadow-card border border-white/20">
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-primary-foreground mb-2">
                 Email or Phone Number
@@ -37,8 +52,11 @@ const Login = () => {
                 type="text"
                 autoComplete="email"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-3 rounded-lg border border-white/20 bg-white/10 text-primary-foreground placeholder-primary-foreground/50 focus:border-highlight focus:ring-1 focus:ring-highlight"
                 placeholder="Enter your email or phone"
+                disabled={isLoading}
               />
             </div>
             
@@ -52,8 +70,11 @@ const Login = () => {
                 type="password"
                 autoComplete="current-password"
                 required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full p-3 rounded-lg border border-white/20 bg-white/10 text-primary-foreground placeholder-primary-foreground/50 focus:border-highlight focus:ring-1 focus:ring-highlight"
                 placeholder="Enter your password"
+                disabled={isLoading}
               />
             </div>
             
@@ -63,7 +84,10 @@ const Login = () => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                   className="h-4 w-4 rounded border-white/20 bg-white/10 text-primary focus:ring-highlight"
+                  disabled={isLoading}
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-primary-foreground/80">
                   Remember me
@@ -78,9 +102,22 @@ const Login = () => {
             </div>
             
             <div>
-              <Button className="w-full bg-white text-primary hover:bg-highlight hover:text-primary">
-                Sign In
-                <ArrowRight className="w-4 h-4 ml-2" />
+              <Button 
+                type="submit" 
+                className="w-full bg-white text-primary hover:bg-highlight hover:text-primary"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Signing In...
+                  </>
+                ) : (
+                  <>
+                    Sign In
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </>
+                )}
               </Button>
             </div>
           </form>
