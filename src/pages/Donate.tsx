@@ -1,11 +1,34 @@
 import PageLayout from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
-import { Heart, Users, ArrowRight } from 'lucide-react';
+import { Heart, Users, ArrowRight, Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { useApp } from '@/contexts/AppContext';
 
 const Donate = () => {
   const [donationAmount, setDonationAmount] = useState<string>('1000');
   const [customAmount, setCustomAmount] = useState<string>('');
+  const [donationType, setDonationType] = useState<string>('generalFund');
+  const { submitDonation, isLoading } = useApp();
+
+  const handleDonate = async () => {
+    const amount = donationAmount === 'custom' ? customAmount : donationAmount;
+    if (!amount || parseInt(amount) < 100) {
+      alert('Minimum donation amount is KSh 100');
+      return;
+    }
+    
+    const donationData = {
+      amount: parseInt(amount),
+      type: donationType
+    };
+    
+    const success = await submitDonation(donationData);
+    if (success) {
+      setDonationAmount('1000');
+      setCustomAmount('');
+      setDonationType('generalFund');
+    }
+  };
 
   const handleAmountSelect = (amount: string) => {
     setDonationAmount(amount);
@@ -116,7 +139,9 @@ const Donate = () => {
                         id="generalFund" 
                         name="donationType" 
                         className="mr-3" 
-                        defaultChecked 
+                        checked={donationType === 'generalFund'}
+                        onChange={() => setDonationType('generalFund')}
+                        disabled={isLoading}
                       />
                       <label htmlFor="generalFund" className="cursor-pointer">
                         <div className="font-medium">General Fund</div>
@@ -131,6 +156,9 @@ const Donate = () => {
                         id="specificCase" 
                         name="donationType" 
                         className="mr-3" 
+                        checked={donationType === 'specificCase'}
+                        onChange={() => setDonationType('specificCase')}
+                        disabled={isLoading}
                       />
                       <label htmlFor="specificCase" className="cursor-pointer">
                         <div className="font-medium">Specific Case</div>
@@ -141,9 +169,22 @@ const Donate = () => {
                 </div>
               </div>
               
-              <Button className="btn-hero w-full">
-                Donate Now
-                <Heart className="w-5 h-5 ml-2" />
+              <Button 
+                className="btn-hero w-full"
+                onClick={handleDonate}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    Donate Now
+                    <Heart className="w-5 h-5 ml-2" />
+                  </>
+                )}
               </Button>
               
               <p className="text-sm text-muted-foreground mt-4 text-center">
