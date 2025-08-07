@@ -1,8 +1,39 @@
 import PageLayout from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
-import { Mail, Phone, MapPin, Send, MessageSquare, Clock } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, MessageSquare, Clock, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { useApp } from '@/contexts/AppContext';
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: ''
+  });
+  const { submitContactForm, isLoading } = useApp();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const success = await submitContactForm(formData);
+    if (success) {
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
+      });
+    }
+  };
   const contactMethods = [
     {
       icon: Phone,
@@ -64,7 +95,7 @@ const Contact = () => {
                 Fill out the form below and our team will get back to you as soon as possible.
               </p>
               
-              <form className="space-y-6">
+              <form className="space-y-6" onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="firstName" className="block text-sm font-medium mb-2">
@@ -73,8 +104,13 @@ const Contact = () => {
                     <input
                       type="text"
                       id="firstName"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
                       className="w-full p-3 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary"
                       placeholder="Your first name"
+                      required
+                      disabled={isLoading}
                     />
                   </div>
                   <div>
@@ -84,8 +120,13 @@ const Contact = () => {
                     <input
                       type="text"
                       id="lastName"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
                       className="w-full p-3 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary"
                       placeholder="Your last name"
+                      required
+                      disabled={isLoading}
                     />
                   </div>
                 </div>
@@ -97,8 +138,13 @@ const Contact = () => {
                   <input
                     type="email"
                     id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
                     className="w-full p-3 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary"
                     placeholder="your.email@example.com"
+                    required
+                    disabled={isLoading}
                   />
                 </div>
                 
@@ -109,8 +155,13 @@ const Contact = () => {
                   <input
                     type="tel"
                     id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
                     className="w-full p-3 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary"
                     placeholder="+254 7XX XXX XXX"
+                    required
+                    disabled={isLoading}
                   />
                 </div>
                 
@@ -120,7 +171,12 @@ const Contact = () => {
                   </label>
                   <select
                     id="subject"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleInputChange}
                     className="w-full p-3 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary"
+                    required
+                    disabled={isLoading}
                   >
                     <option value="">Select a subject</option>
                     <option value="insurance">Insurance Inquiry</option>
@@ -137,15 +193,33 @@ const Contact = () => {
                   </label>
                   <textarea
                     id="message"
+                    name="message"
                     rows={5}
+                    value={formData.message}
+                    onChange={handleInputChange}
                     className="w-full p-3 rounded-lg border border-border focus:border-primary focus:ring-1 focus:ring-primary"
                     placeholder="How can we help you?"
+                    required
+                    disabled={isLoading}
                   ></textarea>
                 </div>
                 
-                <Button className="btn-hero w-full">
-                  Send Message
-                  <Send className="w-4 h-4 ml-2" />
+                <Button 
+                  type="submit" 
+                  className="btn-hero w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      Send Message
+                      <Send className="w-4 h-4 ml-2" />
+                    </>
+                  )}
                 </Button>
               </form>
             </div>
