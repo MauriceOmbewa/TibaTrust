@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useApp } from '@/contexts/AppContext';
 import { Navigate } from 'react-router-dom';
 import { Heart, Shield, Users, CreditCard, FileText, Calendar, Phone, Mail } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { MpesaPayment } from '@/components/payment/MpesaPayment';
 
 const Dashboard = () => {
   const { user } = useApp();
@@ -148,9 +150,11 @@ const Dashboard = () => {
                         </div>
                         <div className="text-right">
                           <div className="font-medium">KSh {payment.amount.toLocaleString()}</div>
-                          <Button size="sm" className="mt-1">
-                            Pay Now
-                          </Button>
+                          <MpesaPayment 
+                            amount={payment.amount}
+                            description={payment.type}
+                            onSuccess={() => console.log('Payment successful')}
+                          />
                         </div>
                       </div>
                     ))}
@@ -191,10 +195,12 @@ const Dashboard = () => {
                   <CardTitle>Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Submit New Claim
-                  </Button>
+                  <Link to="/claims">
+                    <Button variant="outline" className="w-full justify-start">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Submit New Claim
+                    </Button>
+                  </Link>
                   <Button variant="outline" className="w-full justify-start">
                     <Calendar className="h-4 w-4 mr-2" />
                     Book Appointment
