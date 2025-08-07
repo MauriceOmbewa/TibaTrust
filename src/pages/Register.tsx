@@ -1,10 +1,52 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Heart, ArrowRight, CheckCircle } from 'lucide-react';
+import { Heart, ArrowRight, CheckCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { useApp } from '@/contexts/AppContext';
 
 const Register = () => {
   const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    idNumber: '',
+    plan: 'Standard',
+    password: '',
+    confirmPassword: '',
+    terms: false
+  });
+  const { register, isLoading } = useApp();
+  const navigate = useNavigate();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handlePlanChange = (plan: string) => {
+    setFormData(prev => ({ ...prev, plan }));
+  };
+
+  const handleSubmit = async () => {
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+    if (!formData.terms) {
+      alert('Please accept the terms and conditions');
+      return;
+    }
+    
+    const success = await register(formData);
+    if (success) {
+      navigate('/');
+    }
+  };
   
   const handleNextStep = () => {
     setStep(step + 1);
@@ -82,8 +124,11 @@ const Register = () => {
                         name="firstName"
                         type="text"
                         required
+                        value={formData.firstName}
+                        onChange={handleInputChange}
                         className="w-full p-3 rounded-lg border border-white/20 bg-white/10 text-primary-foreground placeholder-primary-foreground/50 focus:border-highlight focus:ring-1 focus:ring-highlight"
                         placeholder="Your first name"
+                        disabled={isLoading}
                       />
                     </div>
                     <div>
@@ -95,8 +140,11 @@ const Register = () => {
                         name="lastName"
                         type="text"
                         required
+                        value={formData.lastName}
+                        onChange={handleInputChange}
                         className="w-full p-3 rounded-lg border border-white/20 bg-white/10 text-primary-foreground placeholder-primary-foreground/50 focus:border-highlight focus:ring-1 focus:ring-highlight"
                         placeholder="Your last name"
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
@@ -111,8 +159,11 @@ const Register = () => {
                       type="email"
                       autoComplete="email"
                       required
+                      value={formData.email}
+                      onChange={handleInputChange}
                       className="w-full p-3 rounded-lg border border-white/20 bg-white/10 text-primary-foreground placeholder-primary-foreground/50 focus:border-highlight focus:ring-1 focus:ring-highlight"
                       placeholder="your.email@example.com"
+                      disabled={isLoading}
                     />
                   </div>
                   
@@ -125,8 +176,11 @@ const Register = () => {
                       name="phone"
                       type="tel"
                       required
+                      value={formData.phone}
+                      onChange={handleInputChange}
                       className="w-full p-3 rounded-lg border border-white/20 bg-white/10 text-primary-foreground placeholder-primary-foreground/50 focus:border-highlight focus:ring-1 focus:ring-highlight"
                       placeholder="+254 7XX XXX XXX"
+                      disabled={isLoading}
                     />
                   </div>
                   
@@ -139,8 +193,11 @@ const Register = () => {
                       name="idNumber"
                       type="text"
                       required
+                      value={formData.idNumber}
+                      onChange={handleInputChange}
                       className="w-full p-3 rounded-lg border border-white/20 bg-white/10 text-primary-foreground placeholder-primary-foreground/50 focus:border-highlight focus:ring-1 focus:ring-highlight"
                       placeholder="Your national ID number"
+                      disabled={isLoading}
                     />
                   </div>
                   
@@ -166,7 +223,9 @@ const Register = () => {
                             id={`plan-${index}`} 
                             name="plan" 
                             className="mr-3" 
-                            defaultChecked={index === 1} 
+                            checked={formData.plan === plan}
+                            onChange={() => handlePlanChange(plan)}
+                            disabled={isLoading}
                           />
                           <label htmlFor={`plan-${index}`} className="cursor-pointer flex-1">
                             <div className="flex justify-between items-center">
@@ -212,8 +271,11 @@ const Register = () => {
                       name="password"
                       type="password"
                       required
+                      value={formData.password}
+                      onChange={handleInputChange}
                       className="w-full p-3 rounded-lg border border-white/20 bg-white/10 text-primary-foreground placeholder-primary-foreground/50 focus:border-highlight focus:ring-1 focus:ring-highlight"
                       placeholder="Create a strong password"
+                      disabled={isLoading}
                     />
                   </div>
                   
@@ -226,8 +288,11 @@ const Register = () => {
                       name="confirmPassword"
                       type="password"
                       required
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
                       className="w-full p-3 rounded-lg border border-white/20 bg-white/10 text-primary-foreground placeholder-primary-foreground/50 focus:border-highlight focus:ring-1 focus:ring-highlight"
                       placeholder="Confirm your password"
+                      disabled={isLoading}
                     />
                   </div>
                   
@@ -237,7 +302,10 @@ const Register = () => {
                         id="terms"
                         name="terms"
                         type="checkbox"
+                        checked={formData.terms}
+                        onChange={handleInputChange}
                         className="h-4 w-4 rounded border-white/20 bg-white/10 text-primary focus:ring-highlight"
+                        disabled={isLoading}
                       />
                     </div>
                     <div className="ml-3 text-sm">
@@ -251,9 +319,22 @@ const Register = () => {
                     <Button onClick={handlePrevStep} className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-primary">
                       Back
                     </Button>
-                    <Button className="bg-white text-primary hover:bg-highlight hover:text-primary">
-                      Complete Registration
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                    <Button 
+                      className="bg-white text-primary hover:bg-highlight hover:text-primary"
+                      onClick={handleSubmit}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Creating Account...
+                        </>
+                      ) : (
+                        <>
+                          Complete Registration
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>
