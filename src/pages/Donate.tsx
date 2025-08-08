@@ -12,14 +12,8 @@ const Donate = () => {
   const { submitDonation, isLoading } = useApp();
 
   const handleDonate = async () => {
-    const amount = donationAmount === 'custom' ? customAmount : donationAmount;
-    if (!amount || parseInt(amount) < 100) {
-      alert('Minimum donation amount is KSh 100');
-      return;
-    }
-    
     const donationData = {
-      amount: parseInt(amount),
+      amount: parseInt(donationAmount === 'custom' ? customAmount : donationAmount),
       type: donationType
     };
     
@@ -29,6 +23,15 @@ const Donate = () => {
       setCustomAmount('');
       setDonationType('generalFund');
     }
+  };
+
+  const handlePaymentTrigger = () => {
+    const amount = donationAmount === 'custom' ? customAmount : donationAmount;
+    if (!amount || parseInt(amount) < 10) {
+      alert('Minimum donation amount is KSh 10');
+      return false;
+    }
+    return true;
   };
 
   const handleAmountSelect = (amount: string) => {
@@ -174,6 +177,7 @@ const Donate = () => {
                 amount={parseInt(donationAmount === 'custom' ? customAmount : donationAmount) || 0}
                 description="Donation to BimaBora Healthcare"
                 onSuccess={handleDonate}
+                onTrigger={handlePaymentTrigger}
               />
               
               <p className="text-sm text-muted-foreground mt-4 text-center">
