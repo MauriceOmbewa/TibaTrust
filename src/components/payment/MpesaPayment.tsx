@@ -1,37 +1,83 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Smartphone, Loader2, CheckCircle } from 'lucide-react';
+import { Smartphone, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { initiateSTKPush, checkPaymentStatus } from '@/services/mpesa';
 
 interface MpesaPaymentProps {
   amount: number;
   description: string;
   onSuccess?: () => void;
+  onTrigger?: () => boolean;
 }
 
-export const MpesaPayment = ({ amount, description, onSuccess }: MpesaPaymentProps) => {
+export const MpesaPayment = ({ amount, description, onSuccess, onTrigger }: MpesaPaymentProps) => {
   const [phone, setPhone] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [checkoutRequestId, setCheckoutRequestId] = useState('');
 
   const handlePayment = async () => {
+    if (!phone.trim()) {
+      setErrorMessage('Please enter your phone number');
+      setIsError(true);
+      return;
+    }
+
     setIsProcessing(true);
+    setIsError(false);
     
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    const formattedPhone = phone.startsWith('0') ? `254${phone.slice(1)}` : phone.replace('+', '');
     
-    setIsProcessing(false);
-    setIsSuccess(true);
-    
-    setTimeout(() => {
-      setIsSuccess(false);
-      setIsOpen(false);
-      onSuccess?.();
-    }, 2000);
+    const response = await initiateSTKPush({
+      phone: formattedPhone,
+      amount,
+      description
+    });
+
+    if (response.success && response.checkoutRequestId) {
+      setCheckoutRequestId(response.checkoutRequestId);
+      
+      // Poll for payment status
+      const pollStatus = async () => {
+        const status = await checkPaymentStatus(response.checkoutRequestId!);
+        
+        if (status.ResultCode === '0') {
+          setIsProcessing(false);
+          setIsSuccess(true);
+          setTimeout(() => {
+            setIsSuccess(false);
+            setIsOpen(false);
+            onSuccess?.();
+          }, 2000);
+        } else if (status.ResultCode && status.ResultCode !== '1032') {
+          setIsProcessing(false);
+          setIsError(true);
+          setErrorMessage(status.ResultDesc || 'Payment failed');
+        } else {
+          // Still processing, poll again
+          setTimeout(pollStatus, 3000);
+        }
+      };
+      
+      setTimeout(pollStatus, 5000);
+    } else {
+      setIsProcessing(false);
+      setIsError(true);
+      setErrorMessage(response.message);
+    }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (open && onTrigger && !onTrigger()) {
+        return;
+      }
+      setIsOpen(open);
+    }}>
       <DialogTrigger asChild>
         <Button className="w-full bg-green-600 hover:bg-green-700">
           <Smartphone className="w-4 h-4 mr-2" />
@@ -46,7 +92,7 @@ export const MpesaPayment = ({ amount, description, onSuccess }: MpesaPaymentPro
           </DialogTitle>
         </DialogHeader>
         
-        {!isProcessing && !isSuccess && (
+        {!isProcessing && !isSuccess && !isError && (
           <div className="space-y-4">
             <div className="text-center">
               <p className="text-lg font-semibold">KSh {amount.toLocaleString()}</p>
@@ -59,13 +105,13 @@ export const MpesaPayment = ({ amount, description, onSuccess }: MpesaPaymentPro
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="+254 7XX XXX XXX"
+                placeholder="0712345678 or +254712345678"
                 className="w-full p-3 border rounded-lg"
               />
             </div>
             
             <Button onClick={handlePayment} className="w-full" disabled={!phone}>
-              Initiate Payment
+              Pay with M-Pesa
             </Button>
             
             <p className="text-xs text-muted-foreground text-center">
@@ -87,6 +133,23 @@ export const MpesaPayment = ({ amount, description, onSuccess }: MpesaPaymentPro
             <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-600" />
             <p className="text-lg font-semibold text-green-600">Payment Successful!</p>
             <p className="text-sm text-muted-foreground">Transaction completed successfully</p>
+          </div>
+        )}
+        
+        {isError && (
+          <div className="text-center py-8">
+            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-600" />
+            <p className="text-lg font-semibold text-red-600">Payment Failed</p>
+            <p className="text-sm text-muted-foreground">{errorMessage}</p>
+            <Button 
+              onClick={() => {
+                setIsError(false);
+                setErrorMessage('');
+              }} 
+              className="mt-4"
+            >
+              Try Again
+            </Button>
           </div>
         )}
       </DialogContent>
