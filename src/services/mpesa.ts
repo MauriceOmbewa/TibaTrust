@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3001/api/mpesa';
+const API_BASE_URL = '/api/mpesa';
 
 export interface MpesaPaymentRequest {
   phone: string;
