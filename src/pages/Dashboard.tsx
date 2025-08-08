@@ -1,251 +1,300 @@
 import PageLayout from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useApp } from '@/contexts/AppContext';
 import { Navigate } from 'react-router-dom';
-import { Heart, Shield, Users, CreditCard, FileText, Calendar, Phone, Mail, Search } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Heart, Shield, Users, CreditCard, FileText, Search, Send, UserPlus, CheckCircle, XCircle, Coins } from 'lucide-react';
 import { MpesaPayment } from '@/components/payment/MpesaPayment';
-import { useState, useMemo } from 'react';
-import { useDebounce } from '@/hooks/useDebounce';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import UserSearch from '@/components/dashboard/UserSearch';
 
 const Dashboard = () => {
   const { user } = useApp();
-  const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearch = useDebounce(searchTerm, 300);
+  const { toast } = useToast();
+  const [tokenAmount, setTokenAmount] = useState('');
+  const [recipientUID, setRecipientUID] = useState('');
+  const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
 
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  const recentClaims = [
-    {
-      id: 'CLM001',
-      date: '2024-01-15',
-      type: 'Outpatient Visit',
-      amount: 2500,
-      status: 'Approved',
-      facility: 'Nairobi Hospital'
-    },
-    {
-      id: 'CLM002',
-      date: '2024-01-10',
-      type: 'Prescription',
-      amount: 800,
-      status: 'Processing',
-      facility: 'City Pharmacy'
-    }
+  // Mock data
+  const userProfile = {
+    ...user,
+    uid: 'UID' + user.id.padStart(6, '0'),
+    tokens: 2500,
+    coverageStatus: 'Active',
+    memberSince: '2024-01-01',
+    nextPaymentDue: '2024-02-01',
+    monthlyPremium: 1000
+  };
+
+  const availableCommunities = [
+    { id: '1', name: 'Nairobi Health Circle', members: 1250, description: 'Supporting healthcare in Nairobi region', joinStatus: 'available' },
+    { id: '2', name: 'Mombasa Care Network', members: 890, description: 'Coastal healthcare community', joinStatus: 'available' },
+    { id: '3', name: 'Kisumu Wellness Group', members: 650, description: 'Western Kenya health support', joinStatus: 'pending' },
+    { id: '4', name: 'Eldoret Medical Aid', members: 420, description: 'Rift Valley healthcare assistance', joinStatus: 'joined' }
   ];
 
-  const upcomingPayments = [
-    {
-      date: '2024-02-01',
-      amount: 1000,
-      type: 'Monthly Premium',
-      status: 'Due'
+  const handleTokenTransfer = () => {
+    if (!recipientUID || !tokenAmount) {
+      toast({ title: 'Error', description: 'Please fill all fields', variant: 'destructive' });
+      return;
     }
-  ];
+    toast({ title: 'Success', description: `${tokenAmount} tokens sent to ${recipientUID}` });
+    setRecipientUID('');
+    setTokenAmount('');
+  };
+
+  const handleJoinCommunity = (communityId: string) => {
+    toast({ title: 'Request Sent', description: 'Your join request has been submitted' });
+  };
+
+  const handlePaymentSuccess = () => {
+    toast({ title: 'Payment Successful', description: 'Your monthly premium has been paid' });
+  };
 
   return (
     <PageLayout>
       <div className="min-h-screen bg-background py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground">Welcome back, {user.firstName}!</h1>
-            <p className="text-muted-foreground">Manage your healthcare coverage and track your benefits.</p>
+            <p className="text-muted-foreground">Manage your healthcare coverage and community connections.</p>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Current Plan</CardTitle>
-                <Shield className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{user.plan}</div>
-                <p className="text-xs text-muted-foreground">Active since Jan 2024</p>
-              </CardContent>
-            </Card>
+          <Tabs defaultValue="overview" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="payment">Payment</TabsTrigger>
+              <TabsTrigger value="communities">Communities</TabsTrigger>
+              <TabsTrigger value="tokens">Tokens</TabsTrigger>
+              <TabsTrigger value="profile">Profile</TabsTrigger>
+            </TabsList>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Claims This Year</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">3</div>
-                <p className="text-xs text-muted-foreground">KSh 4,200 total</p>
-              </CardContent>
-            </Card>
+            <TabsContent value="overview" className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Coverage Status</CardTitle>
+                    {userProfile.coverageStatus === 'Active' ? 
+                      <CheckCircle className="h-4 w-4 text-green-600" /> : 
+                      <XCircle className="h-4 w-4 text-red-600" />
+                    }
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{userProfile.coverageStatus}</div>
+                    <p className="text-xs text-muted-foreground">Since {userProfile.memberSince}</p>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Next Payment</CardTitle>
-                <CreditCard className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">Feb 1</div>
-                <p className="text-xs text-muted-foreground">KSh 1,000 due</p>
-              </CardContent>
-            </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Available Tokens</CardTitle>
+                    <Coins className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{userProfile.tokens}</div>
+                    <p className="text-xs text-muted-foreground">BimaBora Tokens</p>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Community Impact</CardTitle>
-                <Heart className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">5</div>
-                <p className="text-xs text-muted-foreground">People helped</p>
-              </CardContent>
-            </Card>
-          </div>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Next Payment</CardTitle>
+                    <CreditCard className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">Feb 1</div>
+                    <p className="text-xs text-muted-foreground">KSh {userProfile.monthlyPremium}</p>
+                  </CardContent>
+                </Card>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Recent Claims */}
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Communities</CardTitle>
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{availableCommunities.filter(c => c.joinStatus === 'joined').length}</div>
+                    <p className="text-xs text-muted-foreground">Joined</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="payment" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Recent Claims</CardTitle>
-                  <CardDescription>Your latest healthcare claims and their status</CardDescription>
-                  <div className="relative mt-4">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <input
-                      type="text"
-                      placeholder="Search claims..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-2 w-full border rounded-lg"
+                  <CardTitle>Monthly Premium Payment</CardTitle>
+                  <CardDescription>Pay your monthly insurance premium to maintain coverage</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex justify-between items-center mb-4">
+                      <div>
+                        <h3 className="font-medium">Monthly Premium</h3>
+                        <p className="text-sm text-muted-foreground">Due: {userProfile.nextPaymentDue}</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold">KSh {userProfile.monthlyPremium}</div>
+                        <Badge variant={userProfile.coverageStatus === 'Active' ? 'default' : 'destructive'}>
+                          {userProfile.coverageStatus}
+                        </Badge>
+                      </div>
+                    </div>
+                    <MpesaPayment 
+                      amount={userProfile.monthlyPremium}
+                      description="Monthly Insurance Premium"
+                      onSuccess={handlePaymentSuccess}
                     />
                   </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="communities" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Available Communities</CardTitle>
+                  <CardDescription>Join healthcare communities to expand your support network</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {recentClaims.map((claim) => (
-                      <div key={claim.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <div className="font-medium">{claim.type}</div>
-                          <div className="text-sm text-muted-foreground">{claim.facility} • {claim.date}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-medium">KSh {claim.amount.toLocaleString()}</div>
-                          <div className={`text-sm ${
-                            claim.status === 'Approved' ? 'text-green-600' : 
-                            claim.status === 'Processing' ? 'text-yellow-600' : 'text-red-600'
-                          }`}>
-                            {claim.status}
+                    {availableCommunities.map((community) => (
+                      <div key={community.id} className="p-4 border rounded-lg">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h3 className="font-medium">{community.name}</h3>
+                            <p className="text-sm text-muted-foreground mb-2">{community.description}</p>
+                            <p className="text-xs text-muted-foreground">{community.members} members</p>
+                          </div>
+                          <div className="ml-4">
+                            {community.joinStatus === 'joined' && (
+                              <Badge variant="default">Joined</Badge>
+                            )}
+                            {community.joinStatus === 'pending' && (
+                              <Badge variant="secondary">Pending</Badge>
+                            )}
+                            {community.joinStatus === 'available' && (
+                              <Button size="sm" onClick={() => handleJoinCommunity(community.id)}>
+                                <UserPlus className="h-4 w-4 mr-1" />
+                                Join
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
-                  <Button variant="outline" className="w-full mt-4">
-                    View All Claims
-                  </Button>
                 </CardContent>
               </Card>
+            </TabsContent>
 
-              {/* Upcoming Payments */}
+            <TabsContent value="tokens" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Send Tokens</CardTitle>
+                    <CardDescription>Transfer tokens to another user by their UID</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Recipient UID</label>
+                      <Input 
+                        placeholder="Enter user UID (e.g., UID000123)"
+                        value={recipientUID}
+                        onChange={(e) => setRecipientUID(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Token Amount</label>
+                      <Input 
+                        type="number"
+                        placeholder="Enter amount"
+                        value={tokenAmount}
+                        onChange={(e) => setTokenAmount(e.target.value)}
+                      />
+                    </div>
+                    <Button onClick={handleTokenTransfer} className="w-full">
+                      <Send className="h-4 w-4 mr-2" />
+                      Send Tokens
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Search Users</CardTitle>
+                    <CardDescription>Find other users by their UID</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <UserSearch onUserSelect={(uid) => setRecipientUID(uid)} />
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="profile" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Upcoming Payments</CardTitle>
-                  <CardDescription>Your scheduled premium payments</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {upcomingPayments.map((payment, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <div className="font-medium">{payment.type}</div>
-                          <div className="text-sm text-muted-foreground">Due: {payment.date}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-medium">KSh {payment.amount.toLocaleString()}</div>
-                          <MpesaPayment 
-                            amount={payment.amount}
-                            description={payment.type}
-                            onSuccess={() => console.log('Payment successful')}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Profile Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Profile Information</CardTitle>
+                  <CardTitle>Personal Information</CardTitle>
+                  <CardDescription>Your account details and status</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{user.firstName} {user.lastName}</span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">User ID</label>
+                      <p className="font-medium">{userProfile.uid}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">Full Name</label>
+                      <p className="font-medium">{userProfile.firstName} {userProfile.lastName}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">Email</label>
+                      <p className="font-medium">{userProfile.email}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">Phone</label>
+                      <p className="font-medium">{userProfile.phone}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">Plan</label>
+                      <p className="font-medium">{userProfile.plan}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">Coverage Status</label>
+                      <div className="flex items-center space-x-2">
+                        {userProfile.coverageStatus === 'Active' ? 
+                          <CheckCircle className="h-4 w-4 text-green-600" /> : 
+                          <XCircle className="h-4 w-4 text-red-600" />
+                        }
+                        <span className="font-medium">{userProfile.coverageStatus}</span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">Member Since</label>
+                      <p className="font-medium">{userProfile.memberSince}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">Available Tokens</label>
+                      <p className="font-medium">{userProfile.tokens} BimaBora Tokens</p>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{user.email}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{user.phone}</span>
-                  </div>
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full mt-6">
                     Edit Profile
                   </Button>
                 </CardContent>
               </Card>
-
-              {/* Quick Actions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <Link to="/claims">
-                    <Button variant="outline" className="w-full justify-start">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Submit New Claim
-                    </Button>
-                  </Link>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Book Appointment
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Heart className="h-4 w-4 mr-2" />
-                    Make Donation
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Shield className="h-4 w-4 mr-2" />
-                    View Coverage
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Support */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Need Help?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Our support team is available 24/7 to assist you with any questions.
-                  </p>
-                  <Button className="w-full">
-                    Contact Support
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </PageLayout>

@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { validateLoginForm, validateRegistrationForm, validateContactForm, ValidationError } from '@/utils/validation';
+import { useAuth } from './FirebaseAuthContext';
 
 interface User {
   id: string;
@@ -10,6 +11,11 @@ interface User {
   phone: string;
   plan?: string;
   isLoggedIn: boolean;
+  uid?: string;
+  tokens?: number;
+  coverageStatus?: string;
+  memberSince?: string;
+  firebaseUid?: string;
 }
 
 interface AppContextType {
@@ -29,6 +35,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { currentUser, login: firebaseLogin, register: firebaseRegister, logout: firebaseLogout } = useAuth();
 
   const login = async (email: string, password: string): Promise<boolean> => {
     const validationErrors = validateLoginForm(email, password);
@@ -43,34 +50,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockUser: User = {
-        id: '1',
-        firstName: 'John',
-        lastName: 'Doe',
-        email,
-        phone: '+254700123456',
-        plan: 'Standard',
-        isLoggedIn: true
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      
-      toast({
-        title: "Login Successful",
-        description: "Welcome back to BimaBora!",
-      });
-      
-      return true;
-    } catch (error) {
-      toast({
-        title: "Login Failed",
-        description: "Invalid credentials. Please try again.",
-        variant: "destructive",
-      });
-      return false;
+      const success = await firebaseLogin(email, password);
+      return success;
     } finally {
       setIsLoading(false);
     }
@@ -89,46 +70,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const newUser: User = {
-        id: Date.now().toString(),
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        email: userData.email,
-        phone: userData.phone,
-        plan: userData.plan,
-        isLoggedIn: true
-      };
-      
-      setUser(newUser);
-      localStorage.setItem('user', JSON.stringify(newUser));
-      
-      toast({
-        title: "Registration Successful",
-        description: "Welcome to BimaBora! Your account has been created.",
-      });
-      
-      return true;
-    } catch (error) {
-      toast({
-        title: "Registration Failed",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
-      return false;
+      const displayName = `${userData.firstName} ${userData.lastName}`;
+      const success = await firebaseRegister(userData.email, userData.password, displayName);
+      return success;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await firebaseLogout();
     setUser(null);
     localStorage.removeItem('user');
-    toast({
-      title: "Logged Out",
-      description: "You have been successfully logged out.",
-    });
   };
 
   const submitContactForm = async (formData: any): Promise<boolean> => {
@@ -187,12 +140,29 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
-  React.useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+  useEffect(() => {
+    if (currentUser) {
+      const appUser: User = {
+        id: currentUser.uid,
+        firstName: currentUser.displayName?.split(' ')[0] || 'User',
+        lastName: currentUser.displayName?.split(' ')[1] || '',
+        email: currentUser.email || '',
+        phone: '+254700123456',
+        plan: 'Standard',
+        isLoggedIn: true,
+        uid: 'UID' + currentUser.uid.slice(-6),
+        tokens: 2500,
+        coverageStatus: 'Active',
+        memberSince: '2024-01-01',
+        firebaseUid: currentUser.uid
+      };
+      setUser(appUser);
+      localStorage.setItem('user', JSON.stringify(appUser));
+    } else {
+      setUser(null);
+      localStorage.removeItem('user');
     }
-  }, []);
+  }, [currentUser]);
 
   const value: AppContextType = {
     user,

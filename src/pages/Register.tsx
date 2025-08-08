@@ -44,7 +44,7 @@ const Register = () => {
     
     const success = await register(formData);
     if (success) {
-      navigate('/');
+      navigate('/dashboard');
     }
   };
   
