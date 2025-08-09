@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X, Heart, Languages, User, LogOut } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
@@ -9,6 +9,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useApp();
   const { language, setLanguage, t } = useLanguage();
+  const location = useLocation();
 
   const navLinks = [
     { name: t('nav.home'), href: '/' },
@@ -42,15 +43,23 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.href}
-                  className="text-primary-foreground hover:text-highlight px-3 py-2 rounded-md text-sm font-medium transition-smooth"
-                >
-                  {link.name}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const isActive = location.pathname === link.href;
+                return (
+                  <Link
+                    key={link.name}
+                    to={link.href}
+                    className={`relative text-primary-foreground hover:text-highlight px-3 py-2 rounded-md text-sm font-medium transition-smooth ${
+                      isActive ? 'text-highlight' : ''
+                    }`}
+                  >
+                    {link.name}
+                    {isActive && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-highlight rounded-full" />
+                    )}
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
@@ -114,16 +123,24 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden bg-secondary">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.href}
-                className="text-secondary-foreground hover:text-highlight block px-3 py-2 rounded-md text-base font-medium transition-smooth"
-                onClick={() => setIsOpen(false)}
-              >
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.href;
+              return (
+                <Link
+                  key={link.name}
+                  to={link.href}
+                  className={`relative text-secondary-foreground hover:text-highlight block px-3 py-2 rounded-md text-base font-medium transition-smooth ${
+                    isActive ? 'text-highlight bg-accent/50' : ''
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  {link.name}
+                  {isActive && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-highlight rounded-r-full" />
+                  )}
+                </Link>
+              );
+            })}
             <div className="border-t border-accent pt-4 mt-4">
               <div className="flex flex-col space-y-2 px-3">
                 <Button
