@@ -48,7 +48,7 @@ export default async function handler(req, res) {
       PartyA: phone,
       PartyB: process.env.MPESA_SHORTCODE,
       PhoneNumber: phone,
-      CallBackURL: `${process.env.VERCEL_URL || 'https://your-app.vercel.app'}/api/mpesa/callback`,
+      CallBackURL: 'https://tibatrust.vercel.app/api/mpesa/callback',
       AccountReference: 'BimaBora',
       TransactionDesc: description
     };
