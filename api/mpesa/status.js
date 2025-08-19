@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 const MPESA_BASE_URL = process.env.NODE_ENV === 'production' 
   ? 'https://api.safaricom.co.ke' 
