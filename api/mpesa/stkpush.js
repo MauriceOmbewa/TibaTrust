@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 const MPESA_BASE_URL = process.env.NODE_ENV === 'production' 
   ? 'https://api.safaricom.co.ke' 
@@ -20,11 +20,19 @@ const getAccessToken = async () => {
 };
 
 export default async function handler(req, res) {
+  console.log('STK Push request received');
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
   const { phone, amount, description } = req.body;
+  console.log('Request data:', { phone, amount, description });
+  console.log('Environment check:', {
+    hasKey: !!process.env.MPESA_CONSUMER_KEY,
+    hasSecret: !!process.env.MPESA_CONSUMER_SECRET,
+    shortcode: process.env.MPESA_SHORTCODE
+  });
 
   try {
     const token = await getAccessToken();
@@ -58,9 +66,10 @@ export default async function handler(req, res) {
       message: 'STK Push sent successfully'
     });
   } catch (error) {
+    console.error('STK Push error:', error.response?.data || error.message);
     res.status(500).json({
       success: false,
-      message: error.response?.data?.errorMessage || 'Payment failed'
+      message: error.response?.data?.errorMessage || error.message || 'Payment failed'
     });
   }
 }
