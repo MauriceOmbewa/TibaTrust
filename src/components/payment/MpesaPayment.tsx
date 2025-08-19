@@ -42,28 +42,57 @@ export const MpesaPayment = ({ amount, description, onSuccess, onTrigger }: Mpes
       setCheckoutRequestId(response.checkoutRequestId);
       
       // Poll for payment status
+      let pollCount = 0;
+      const maxPolls = 12; // 60 seconds total (15s initial + 12 * 5s)
+      
       const pollStatus = async () => {
-        const status = await checkPaymentStatus(response.checkoutRequestId!);
+        pollCount++;
         
-        if (status.ResultCode === '0') {
-          setIsProcessing(false);
-          setIsSuccess(true);
-          setTimeout(() => {
-            setIsSuccess(false);
-            setIsOpen(false);
-            onSuccess?.();
-          }, 2000);
-        } else if (status.ResultCode && status.ResultCode !== '1032') {
-          setIsProcessing(false);
-          setIsError(true);
-          setErrorMessage(status.ResultDesc || 'Payment failed');
-        } else {
-          // Still processing, poll again
-          setTimeout(pollStatus, 3000);
+        try {
+          const status = await checkPaymentStatus(response.checkoutRequestId!);
+          console.log('Payment status check:', status);
+          
+          if (status.ResultCode === '0') {
+            // Payment successful
+            setIsProcessing(false);
+            setIsSuccess(true);
+            setTimeout(() => {
+              setIsSuccess(false);
+              setIsOpen(false);
+              onSuccess?.();
+            }, 2000);
+          } else if (status.ResultCode === '1032') {
+            // User cancelled
+            setIsProcessing(false);
+            setIsError(true);
+            setErrorMessage('Payment cancelled by user');
+          } else if (status.ResultCode && status.ResultCode !== '1037') {
+            // Other error codes (not timeout)
+            setIsProcessing(false);
+            setIsError(true);
+            setErrorMessage(status.ResultDesc || 'Payment failed');
+          } else if (pollCount >= maxPolls) {
+            // Timeout after 60 seconds
+            setIsProcessing(false);
+            setIsError(true);
+            setErrorMessage('Payment timeout. Please try again.');
+          } else {
+            // Still processing, poll again
+            setTimeout(pollStatus, 5000); // Longer interval
+          }
+        } catch (error) {
+          console.log('Status check failed, retrying...', error);
+          if (pollCount >= maxPolls) {
+            setIsProcessing(false);
+            setIsError(true);
+            setErrorMessage('Payment timeout. Please check your M-Pesa messages.');
+          } else {
+            setTimeout(pollStatus, 5000); // Longer interval between retries
+          }
         }
       };
       
-      setTimeout(pollStatus, 5000);
+      setTimeout(pollStatus, 15000); // Wait 15 seconds before first status check
     } else {
       setIsProcessing(false);
       setIsError(true);
