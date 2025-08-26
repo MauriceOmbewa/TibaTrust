@@ -42,7 +42,7 @@ const HowItWorks = () => {
       <section className="py-20 bg-gradient-hero text-primary-foreground relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-secondary/80" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-6">How BimaBora Works</h1>
+          <h1 className="text-4xl sm:text-5xl font-bold mb-6">How TibaTrust Works</h1>
           <p className="text-xl max-w-3xl mx-auto mb-8">
             Our blockchain-powered healthcare platform makes insurance accessible, 
             affordable, and transparent for all Kenyans.
@@ -55,7 +55,7 @@ const HowItWorks = () => {
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">Simple Steps to Healthcare Access</h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Follow these easy steps to get started with BimaBora and secure your health coverage.
+              Follow these easy steps to get started with TibaTrust and secure your health coverage.
             </p>
           </div>
 
@@ -75,7 +75,7 @@ const HowItWorks = () => {
             <h3 className="text-2xl font-bold mb-6">Ready to Get Started?</h3>
             <Link to="/register">
               <Button className="btn-hero group">
-                Join BimaBora Today
+                Join TibaTrust Today
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
