@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Heart, Languages, User, LogOut } from 'lucide-react';
+import { Menu, X, Languages, User, LogOut } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -30,14 +30,11 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-highlight rounded-full flex items-center justify-center">
-                <Heart className="w-5 h-5 text-primary" />
-              </div>
-              <span className="text-xl font-bold text-primary-foreground">
-                BimaBora
-              </span>
-            </div>
+            <img 
+              src="/tt.png" 
+              alt="TibaTrust" 
+              className="h-12 w-auto object-contain"
+            />
           </Link>
 
           {/* Desktop Navigation */}
