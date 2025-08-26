@@ -101,7 +101,7 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{userProfile.tokens}</div>
-                    <p className="text-xs text-muted-foreground">BimaBora Tokens</p>
+                    <p className="text-xs text-muted-foreground">TibaTrust Tokens</p>
                   </CardContent>
                 </Card>
 
@@ -285,7 +285,7 @@ const Dashboard = () => {
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-muted-foreground">Available Tokens</label>
-                      <p className="font-medium">{userProfile.tokens} BimaBora Tokens</p>
+                      <p className="font-medium">{userProfile.tokens} TibaTrust Tokens</p>
                     </div>
                   </div>
                   <Button variant="outline" className="w-full mt-6">
