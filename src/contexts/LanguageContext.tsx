@@ -30,7 +30,7 @@ const translations = {
     'login.forgotPassword': 'Forgot your password?',
     'login.signIn': 'Sign In',
     'login.signingIn': 'Signing In...',
-    'register.title': 'Join BimaBora',
+    'register.title': 'Join TibaTrust',
     'register.subtitle': 'Create your account to access affordable healthcare'
   },
   sw: {
@@ -56,7 +56,7 @@ const translations = {
     'login.forgotPassword': 'Umesahau nenosiri lako?',
     'login.signIn': 'Ingia',
     'login.signingIn': 'Kuingia...',
-    'register.title': 'Jiunge na BimaBora',
+    'register.title': 'Jiunge na TibaTrust',
     'register.subtitle': 'Unda akaunti yako ili kupata huduma za afya za bei nafuu'
   }
 };
