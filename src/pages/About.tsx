@@ -92,7 +92,7 @@ const About = () => {
       <section className="py-20 bg-gradient-hero text-primary-foreground relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-secondary/80" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-6">About BimaBora</h1>
+          <h1 className="text-4xl sm:text-5xl font-bold mb-6">About TibaTrust</h1>
           <p className="text-xl max-w-3xl mx-auto mb-8">
             We're on a mission to make quality healthcare accessible to every Kenyan 
             through blockchain technology and community support.
@@ -107,7 +107,7 @@ const About = () => {
               <h2 className="text-3xl font-bold mb-6">Our Story</h2>
               <div className="space-y-4 text-lg">
                 <p>
-                  BimaBora was founded in 2022 by Dr. Sarah Kimani, a physician who witnessed firsthand 
+                  TibaTrust was founded in 2022 by Dr. Sarah Kimani, a physician who witnessed firsthand 
                   the challenges many Kenyans face in accessing quality healthcare due to financial constraints.
                 </p>
                 <p>
@@ -116,12 +116,12 @@ const About = () => {
                   healthcare more accessible and affordable.
                 </p>
                 <p>
-                  By combining blockchain technology with community-based insurance principles, BimaBora 
+                  By combining blockchain technology with community-based insurance principles, TibaTrust 
                   was born - a platform that provides transparent, affordable healthcare coverage while 
                   enabling community members to support each other.
                 </p>
                 <p>
-                  Today, BimaBora serves thousands of Kenyans across the country, with a focus on 
+                  Today, TibaTrust serves thousands of Kenyans across the country, with a focus on 
                   underserved rural communities and women's health issues.
                 </p>
               </div>
@@ -165,7 +165,7 @@ const About = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Our Values</h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              These core principles guide everything we do at BimaBora.
+              These core principles guide everything we do at TibaTrust.
             </p>
           </div>
           
