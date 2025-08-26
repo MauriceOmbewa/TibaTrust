@@ -49,7 +49,7 @@ export default async function handler(req, res) {
       PartyB: process.env.MPESA_SHORTCODE,
       PhoneNumber: phone,
       CallBackURL: 'https://tibatrust.vercel.app/api/mpesa/callback',
-      AccountReference: 'BimaBora',
+      AccountReference: 'TibaTrust',
       TransactionDesc: description
     };
 
