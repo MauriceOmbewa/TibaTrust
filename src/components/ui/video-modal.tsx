@@ -9,7 +9,7 @@ interface VideoModalProps {
   title?: string;
 }
 
-export const VideoModal = ({ trigger, videoUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ", title = "How BimaBora Works" }: VideoModalProps) => {
+export const VideoModal = ({ trigger, videoUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ", title = "How TibaTrust Works" }: VideoModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

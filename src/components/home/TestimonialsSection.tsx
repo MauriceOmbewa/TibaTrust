@@ -10,7 +10,7 @@ const TestimonialsSection = () => {
       role: 'Mother of 2',
       rating: 5,
       image: 'https://images.unsplash.com/photo-1494790108755-2616b612b3a5?w=150&h=150&fit=crop&crop=face',
-      quote: 'BimaBora helped me get the surgery I needed for obstetric fistula. The community support was incredible, and I could track every donation. Now I can live with dignity again.',
+      quote: 'TibaTrust helped me get the surgery I needed for obstetric fistula. The community support was incredible, and I could track every donation. Now I can live with dignity again.',
       impact: 'Received KSh 85,000 in community support'
     },
     {
@@ -28,8 +28,8 @@ const TestimonialsSection = () => {
       role: 'Healthcare Provider',
       rating: 5,
       image: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=150&h=150&fit=crop&crop=face',
-      quote: 'As a doctor, I see how BimaBora is transforming healthcare access. The blockchain transparency builds trust, and patients get the care they need without financial stress.',
-      impact: 'Treated 200+ BimaBora patients'
+      quote: 'As a doctor, I see how TibaTrust is transforming healthcare access. The blockchain transparency builds trust, and patients get the care they need without financial stress.',
+      impact: 'Treated 200+ TibaTrust patients'
     }
   ];
 

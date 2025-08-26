@@ -59,7 +59,7 @@ const HeroSection = () => {
                     Watch How It Works
                   </Button>
                 }
-                title="How BimaBora Healthcare Platform Works"
+                title="How TibaTrust Healthcare Platform Works"
               />
             </div>
             
