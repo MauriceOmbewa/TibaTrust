@@ -175,7 +175,7 @@ const Donate = () => {
               
               <MpesaPayment
                 amount={parseInt(donationAmount === 'custom' ? customAmount : donationAmount) || 0}
-                description="Donation to BimaBora Healthcare"
+                description="Donation to TibaTrust Healthcare"
                 onSuccess={handleDonate}
                 onTrigger={handlePaymentTrigger}
               />
