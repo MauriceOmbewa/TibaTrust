@@ -59,7 +59,7 @@ app.post('/api/mpesa/stkpush', async (req, res) => {
       PartyB: process.env.MPESA_SHORTCODE,
       PhoneNumber: phone,
       CallBackURL: 'https://mydomain.com/payments/callback',
-      AccountReference: 'BimaBora',
+      AccountReference: 'TibaTrust',
       TransactionDesc: description
     };
 
