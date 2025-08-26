@@ -75,10 +75,10 @@ const Register = () => {
             <div className="w-10 h-10 bg-highlight rounded-full flex items-center justify-center">
               <Heart className="w-6 h-6 text-primary" />
             </div>
-            <span className="text-2xl font-bold text-primary-foreground">BimaBora</span>
+            <span className="text-2xl font-bold text-primary-foreground">TibaTrust</span>
           </Link>
           <h2 className="mt-6 text-3xl font-bold text-primary-foreground">
-            Join BimaBora
+            Join TibaTrust
           </h2>
           <p className="mt-2 text-sm text-primary-foreground/80">
             Create your account to access affordable healthcare
