@@ -2,21 +2,24 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Heart, ArrowRight, Loader2 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const { login, isLoading } = useApp();
+  const { login, isLoading, user } = useApp();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user?.isLoggedIn) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await login(email, password);
-    if (success) {
-      navigate('/dashboard');
-    }
+    await login(email, password);
   };
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
