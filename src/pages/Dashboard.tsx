@@ -10,6 +10,7 @@ import { useUnifiedAuth } from '@/hooks/useUnifiedAuth';
 import { Navigate } from 'react-router-dom';
 import { Heart, Shield, Users, CreditCard, FileText, Search, Send, UserPlus, CheckCircle, XCircle, Coins } from 'lucide-react';
 import { MpesaPayment } from '@/components/payment/MpesaPayment';
+import { WalletPayment } from '@/components/payment/WalletPayment';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import UserSearch from '@/components/dashboard/UserSearch';
@@ -152,33 +153,46 @@ const Dashboard = () => {
             </TabsContent>
 
             <TabsContent value="payment" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Monthly Premium Payment</CardTitle>
-                  <CardDescription>Pay your monthly insurance premium to maintain coverage</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 border rounded-lg">
-                    <div className="flex justify-between items-center mb-4">
-                      <div>
-                        <h3 className="font-medium">Monthly Premium</h3>
-                        <p className="text-sm text-muted-foreground">Due: {userProfile.nextPaymentDue}</p>
+              <Tabs defaultValue="wallet" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="wallet">Wallet Payment</TabsTrigger>
+                  <TabsTrigger value="mpesa">M-Pesa Payment</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="wallet">
+                  <WalletPayment />
+                </TabsContent>
+                
+                <TabsContent value="mpesa">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Monthly Premium Payment</CardTitle>
+                      <CardDescription>Pay your monthly insurance premium to maintain coverage</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="p-4 border rounded-lg">
+                        <div className="flex justify-between items-center mb-4">
+                          <div>
+                            <h3 className="font-medium">Monthly Premium</h3>
+                            <p className="text-sm text-muted-foreground">Due: {userProfile.nextPaymentDue}</p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-2xl font-bold">KSh {userProfile.monthlyPremium}</div>
+                            <Badge variant={userProfile.coverageStatus === 'Active' ? 'default' : 'destructive'}>
+                              {userProfile.coverageStatus}
+                            </Badge>
+                          </div>
+                        </div>
+                        <MpesaPayment 
+                          amount={userProfile.monthlyPremium}
+                          description="Monthly Insurance Premium"
+                          onSuccess={handlePaymentSuccess}
+                        />
                       </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold">KSh {userProfile.monthlyPremium}</div>
-                        <Badge variant={userProfile.coverageStatus === 'Active' ? 'default' : 'destructive'}>
-                          {userProfile.coverageStatus}
-                        </Badge>
-                      </div>
-                    </div>
-                    <MpesaPayment 
-                      amount={userProfile.monthlyPremium}
-                      description="Monthly Insurance Premium"
-                      onSuccess={handlePaymentSuccess}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
             </TabsContent>
 
             <TabsContent value="communities" className="space-y-6">
