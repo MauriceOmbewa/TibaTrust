@@ -6,7 +6,7 @@ import { Wallet, Loader2, CheckCircle, AlertCircle, ToggleLeft, ToggleRight } fr
 import { useToast } from '@/hooks/use-toast';
 import { useBlockchainAuth } from '@/contexts/BlockchainAuthContext';
 import { payPremiumForPlan, getWalletBalance } from '@/services/blockchain/contract';
-import { formatEther, parseEther } from '@/services/blockchain/web3';
+import { formatEther, parseEther, getCurrentNetwork, switchToCorrectNetwork } from '@/services/blockchain/web3';
 import { CurrencyService } from '@/services/currency';
 
 interface InsurancePlan {
@@ -49,6 +49,7 @@ export const WalletPayment = () => {
   const [walletBalance, setWalletBalance] = useState<string>('0');
   const [showKSH, setShowKSH] = useState(false);
   const [ethToKshRate, setEthToKshRate] = useState<number>(400000);
+  const [currentNetwork, setCurrentNetwork] = useState<any>(null);
   const { user } = useBlockchainAuth();
   const { toast } = useToast();
 
@@ -57,7 +58,13 @@ export const WalletPayment = () => {
     CurrencyService.getETHToKSHRate().then(rate => {
       setEthToKshRate(rate);
     });
-  }, []);
+    
+    // Check network on mount
+    if (user?.address) {
+      checkNetwork();
+      checkBalance();
+    }
+  }, [user?.address]);
 
   const formatPrice = (ethPrice: string) => {
     const eth = parseFloat(ethPrice);
@@ -88,6 +95,35 @@ export const WalletPayment = () => {
     }
   };
 
+  const checkNetwork = async () => {
+    try {
+      const network = await getCurrentNetwork();
+      setCurrentNetwork(network);
+      return network;
+    } catch (error) {
+      console.error('Failed to get network:', error);
+      return null;
+    }
+  };
+
+  const handleNetworkSwitch = async () => {
+    try {
+      await switchToCorrectNetwork();
+      await checkNetwork();
+      await checkBalance();
+      toast({
+        title: 'Network Switched',
+        description: 'Successfully switched to Base Sepolia testnet'
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Network Switch Failed',
+        description: error.message,
+        variant: 'destructive'
+      });
+    }
+  };
+
   const handlePayment = async (planId: number, price: string) => {
     if (!user?.address) {
       toast({
@@ -106,6 +142,17 @@ export const WalletPayment = () => {
       await checkBalance();
       const balance = parseFloat(walletBalance);
       const planPrice = parseFloat(price);
+
+      // Check network first
+      const network = await checkNetwork();
+      if (!network?.isCorrectNetwork) {
+        toast({
+          title: 'Wrong Network',
+          description: 'Please switch to Base Sepolia testnet to make payments',
+          variant: 'destructive'
+        });
+        return;
+      }
 
       if (balance < planPrice) {
         const needed = showKSH ? `KSh ${(planPrice * ethToKshRate).toLocaleString()}` : `${price} ETH`;
@@ -171,12 +218,28 @@ export const WalletPayment = () => {
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">Network:</span>
-              <Badge variant="outline">Base Sepolia</Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant={currentNetwork?.isCorrectNetwork ? 'default' : 'destructive'}>
+                  {currentNetwork?.chainId === 84532 ? 'Base Sepolia' : 
+                   currentNetwork?.chainId === 8453 ? 'Base Mainnet' : 
+                   currentNetwork?.chainId ? `Chain ${currentNetwork.chainId}` : 'Unknown'}
+                </Badge>
+                {!currentNetwork?.isCorrectNetwork && (
+                  <Button onClick={handleNetworkSwitch} size="sm" variant="outline">
+                    Switch Network
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex gap-2 mt-4">
-            <Button onClick={checkBalance} variant="outline" size="sm" className="flex-1">
-              Refresh Balance
+            <Button 
+              onClick={() => { checkBalance(); checkNetwork(); }} 
+              variant="outline" 
+              size="sm" 
+              className="flex-1"
+            >
+              Refresh
             </Button>
             <Button 
               onClick={() => setShowKSH(!showKSH)} 
