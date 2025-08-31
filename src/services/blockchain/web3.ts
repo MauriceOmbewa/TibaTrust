@@ -109,3 +109,52 @@ export const formatEther = (value: bigint) => {
 export const parseEther = (value: string) => {
   return ethers.parseEther(value);
 };
+
+export const getCurrentNetwork = async () => {
+  const provider = getProvider();
+  if (!provider) return null;
+  
+  try {
+    const network = await provider.getNetwork();
+    return {
+      chainId: Number(network.chainId),
+      name: network.name,
+      isCorrectNetwork: Number(network.chainId) === CURRENT_CHAIN_ID
+    };
+  } catch (error) {
+    console.error('Failed to get network:', error);
+    return null;
+  }
+};
+
+export const switchToCorrectNetwork = async () => {
+  if (typeof window === 'undefined' || !window.ethereum) {
+    throw new Error('Wallet not available');
+  }
+
+  try {
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: `0x${CURRENT_CHAIN_ID.toString(16)}` }],
+    });
+  } catch (switchError: any) {
+    if (switchError.code === 4902) {
+      await window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+          chainId: `0x${CURRENT_CHAIN_ID.toString(16)}`,
+          chainName: 'Base Sepolia',
+          nativeCurrency: {
+            name: 'Ethereum',
+            symbol: 'ETH',
+            decimals: 18,
+          },
+          rpcUrls: ['https://sepolia.base.org'],
+          blockExplorerUrls: ['https://sepolia.basescan.org'],
+        }],
+      });
+    } else {
+      throw switchError;
+    }
+  }
+};
