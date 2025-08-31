@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Heart, ArrowRight, Loader2 } from 'lucide-react';
+import { Heart, ArrowRight, Loader2, Wallet } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useState, useEffect } from 'react';
 
@@ -137,19 +137,28 @@ const Login = () => {
               </div>
             </div>
             
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                className="w-full inline-flex justify-center py-2 px-4 border border-white/20 rounded-lg shadow-sm bg-white/10 text-sm font-medium text-primary-foreground hover:bg-white/20"
-              >
-                Google
-              </button>
-              <button
-                type="button"
-                className="w-full inline-flex justify-center py-2 px-4 border border-white/20 rounded-lg shadow-sm bg-white/10 text-sm font-medium text-primary-foreground hover:bg-white/20"
-              >
-                M-Pesa
-              </button>
+            <div className="mt-6 space-y-3">
+              <Link to="/blockchain-login">
+                <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700">
+                  <Wallet className="w-4 h-4 mr-2" />
+                  Connect Wallet (Blockchain)
+                </Button>
+              </Link>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  className="w-full inline-flex justify-center py-2 px-4 border border-white/20 rounded-lg shadow-sm bg-white/10 text-sm font-medium text-primary-foreground hover:bg-white/20"
+                >
+                  Google
+                </button>
+                <button
+                  type="button"
+                  className="w-full inline-flex justify-center py-2 px-4 border border-white/20 rounded-lg shadow-sm bg-white/10 text-sm font-medium text-primary-foreground hover:bg-white/20"
+                >
+                  M-Pesa
+                </button>
+              </div>
             </div>
           </div>
         </div>
