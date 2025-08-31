@@ -1,4 +1,4 @@
-import { getContract, parseEther, formatEther } from './web3';
+import { getContract, parseEther, formatEther, getProvider } from './web3';
 
 export interface InsurancePlan {
   id: number;
@@ -44,6 +44,21 @@ export const payPremium = async (premiumAmount: string) => {
     value: parseEther(premiumAmount)
   });
   return await tx.wait();
+};
+
+export const payPremiumForPlan = async (planId: number, premiumAmount: string) => {
+  const contract = await getContract();
+  const tx = await contract.payPremiumForPlan(planId, {
+    value: parseEther(premiumAmount)
+  });
+  return await tx.wait();
+};
+
+export const getWalletBalance = async (address: string): Promise<string> => {
+  const provider = getProvider();
+  if (!provider) throw new Error('No provider available');
+  const balance = await provider.getBalance(address);
+  return formatEther(balance);
 };
 
 export const submitClaim = async (amount: string, description: string) => {
