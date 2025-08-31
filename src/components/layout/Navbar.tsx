@@ -3,13 +3,30 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X, Languages, User, LogOut, Heart } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { useUnifiedAuth } from '@/hooks/useUnifiedAuth';
+import { useBlockchainAuth } from '@/contexts/BlockchainAuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, logout } = useApp();
+  const { user, logout: firebaseLogout } = useApp();
+  const { logout: blockchainLogout } = useBlockchainAuth();
+  const { isAuthenticated, currentUser, authType } = useUnifiedAuth();
   const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
+
+  const handleLogout = () => {
+    if (authType === 'blockchain') {
+      blockchainLogout();
+    } else {
+      firebaseLogout();
+    }
+  };
+
+  const displayUser = authType === 'firebase' ? user : {
+    firstName: currentUser?.address?.slice(0, 6) || 'User',
+    lastName: ''
+  };
 
   const navLinks = [
     { name: t('nav.home'), href: '/' },
@@ -72,16 +89,19 @@ const Navbar = () => {
               <Languages className="w-4 h-4 mr-2" />
               {language === 'en' ? 'SW' : 'EN'}
             </Button>
-            {user ? (
+            {isAuthenticated ? (
               <div className="flex items-center space-x-3">
                 <Link to="/dashboard" className="flex items-center space-x-2 text-primary-foreground hover:text-highlight">
                   <User className="w-4 h-4" />
-                  <span className="text-sm">{user.firstName}</span>
+                  <span className="text-sm">{displayUser.firstName}</span>
+                  {authType === 'blockchain' && (
+                    <span className="text-xs bg-blue-500 px-1 rounded">Web3</span>
+                  )}
                 </Link>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="text-primary-foreground hover:bg-secondary"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
@@ -90,8 +110,13 @@ const Navbar = () => {
               </div>
             ) : (
               <>
-                <Link to="/login">
+                <Link to="/blockchain-login">
                   <Button variant="secondary" size="sm">
+                    Connect Wallet
+                  </Button>
+                </Link>
+                <Link to="/login">
+                  <Button variant="outline" size="sm">
                     {t('nav.login')}
                   </Button>
                 </Link>
@@ -150,7 +175,7 @@ const Navbar = () => {
                   <Languages className="w-4 h-4 mr-2" />
                   Switch to {language === 'en' ? 'Swahili' : 'English'}
                 </Button>
-                {user ? (
+                {isAuthenticated ? (
                   <>
                     <Link 
                       to="/dashboard" 
@@ -158,13 +183,16 @@ const Navbar = () => {
                       onClick={() => setIsOpen(false)}
                     >
                       <User className="w-4 h-4" />
-                      <span>{user.firstName} {user.lastName}</span>
+                      <span>{displayUser.firstName} {displayUser.lastName}</span>
+                      {authType === 'blockchain' && (
+                        <span className="text-xs bg-blue-500 px-1 rounded text-white">Web3</span>
+                      )}
                     </Link>
                     <Button
                       variant="outline"
                       className="w-full"
                       onClick={() => {
-                        logout();
+                        handleLogout();
                         setIsOpen(false);
                       }}
                     >
@@ -174,6 +202,11 @@ const Navbar = () => {
                   </>
                 ) : (
                   <>
+                    <Link to="/blockchain-login" onClick={() => setIsOpen(false)}>
+                      <Button variant="secondary" className="w-full">
+                        Connect Wallet
+                      </Button>
+                    </Link>
                     <Link to="/login" onClick={() => setIsOpen(false)}>
                       <Button variant="outline" className="w-full">
                         {t('nav.login')}
