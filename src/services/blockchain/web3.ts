@@ -3,18 +3,24 @@ import { ethers } from 'ethers';
 export const BASE_CHAIN_ID = 8453;
 export const BASE_SEPOLIA_CHAIN_ID = 84532;
 
+// Use Base Sepolia for testing
+export const CURRENT_CHAIN_ID = BASE_SEPOLIA_CHAIN_ID;
+
 export const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '';
 
 export const CONTRACT_ABI = [
-  "function register() external",
+  "function registerUser(uint256 _planId) external payable",
+  "function payPremium() external payable",
+  "function payPremiumForPlan(uint256 _planId) external payable",
   "function donate() external payable",
   "function balanceOf(address) external view returns (uint256)",
-  "function registered(address) external view returns (bool)",
+  "function users(address) external view returns (uint256, uint256, uint256, bool)",
+  "function plans(uint256) external view returns (uint256, uint256, bool)",
   "function totalDonations() external view returns (uint256)",
   "function getContractBalance() external view returns (uint256)",
-  "event UserRegistered(address indexed user)",
-  "event DonationReceived(address indexed donor, uint256 amount)",
-  "event TokensMinted(address indexed user, uint256 amount)"
+  "event UserRegistered(address indexed user, uint256 planId)",
+  "event PremiumPaid(address indexed user, uint256 amount)",
+  "event DonationReceived(address indexed donor, uint256 amount)"
 ];
 
 export const getProvider = () => {
@@ -59,27 +65,27 @@ export const connectWallet = async () => {
   try {
     await window.ethereum.request({ method: 'eth_requestAccounts' });
     
-    // Switch to Base network
+    // Switch to Base Sepolia testnet
     try {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: `0x${BASE_CHAIN_ID.toString(16)}` }],
+        params: [{ chainId: `0x${CURRENT_CHAIN_ID.toString(16)}` }],
       });
     } catch (switchError: any) {
-      // Add Base network if not exists
+      // Add Base Sepolia network if not exists
       if (switchError.code === 4902) {
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
           params: [{
-            chainId: `0x${BASE_CHAIN_ID.toString(16)}`,
-            chainName: 'Base',
+            chainId: `0x${CURRENT_CHAIN_ID.toString(16)}`,
+            chainName: 'Base Sepolia',
             nativeCurrency: {
               name: 'Ethereum',
               symbol: 'ETH',
               decimals: 18,
             },
-            rpcUrls: ['https://mainnet.base.org'],
-            blockExplorerUrls: ['https://basescan.org'],
+            rpcUrls: ['https://sepolia.base.org'],
+            blockExplorerUrls: ['https://sepolia.basescan.org'],
           }],
         });
       }
