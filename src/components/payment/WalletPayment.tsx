@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Wallet, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Wallet, Loader2, CheckCircle, AlertCircle, ToggleLeft, ToggleRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useBlockchainAuth } from '@/contexts/BlockchainAuthContext';
 import { payPremiumForPlan, getWalletBalance } from '@/services/blockchain/contract';
 import { formatEther, parseEther } from '@/services/blockchain/web3';
+import { CurrencyService } from '@/services/currency';
 
 interface InsurancePlan {
   id: number;
@@ -15,6 +16,8 @@ interface InsurancePlan {
   coverage: string;
   features: string[];
 }
+
+
 
 const INSURANCE_PLANS: InsurancePlan[] = [
   {
@@ -44,8 +47,35 @@ export const WalletPayment = () => {
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [walletBalance, setWalletBalance] = useState<string>('0');
+  const [showKSH, setShowKSH] = useState(false);
+  const [ethToKshRate, setEthToKshRate] = useState<number>(400000);
   const { user } = useBlockchainAuth();
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Fetch real-time conversion rate
+    CurrencyService.getETHToKSHRate().then(rate => {
+      setEthToKshRate(rate);
+    });
+  }, []);
+
+  const formatPrice = (ethPrice: string) => {
+    const eth = parseFloat(ethPrice);
+    if (showKSH) {
+      const ksh = eth * ethToKshRate;
+      return `KSh ${ksh.toLocaleString()}`;
+    }
+    return `${ethPrice} ETH`;
+  };
+
+  const formatBalance = (ethBalance: string) => {
+    const eth = parseFloat(ethBalance);
+    if (showKSH) {
+      const ksh = eth * ethToKshRate;
+      return `KSh ${ksh.toLocaleString()}`;
+    }
+    return `${eth.toFixed(4)} ETH`;
+  };
 
   const checkBalance = async () => {
     if (!user?.address) return;
@@ -78,9 +108,11 @@ export const WalletPayment = () => {
       const planPrice = parseFloat(price);
 
       if (balance < planPrice) {
+        const needed = showKSH ? `KSh ${(planPrice * ethToKshRate).toLocaleString()}` : `${price} ETH`;
+        const have = showKSH ? `KSh ${(balance * ethToKshRate).toLocaleString()}` : `${balance.toFixed(4)} ETH`;
         toast({
           title: 'Insufficient Balance',
-          description: `You need ${price} ETH but only have ${parseFloat(walletBalance).toFixed(4)} ETH`,
+          description: `You need ${needed} but only have ${have}`,
           variant: 'destructive'
         });
         return;
@@ -135,16 +167,27 @@ export const WalletPayment = () => {
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">Balance:</span>
-              <span className="text-sm font-semibold">{parseFloat(walletBalance).toFixed(4)} ETH</span>
+              <span className="text-sm font-semibold">{formatBalance(walletBalance)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">Network:</span>
               <Badge variant="outline">Base Sepolia</Badge>
             </div>
           </div>
-          <Button onClick={checkBalance} variant="outline" size="sm" className="w-full mt-4">
-            Refresh Balance
-          </Button>
+          <div className="flex gap-2 mt-4">
+            <Button onClick={checkBalance} variant="outline" size="sm" className="flex-1">
+              Refresh Balance
+            </Button>
+            <Button 
+              onClick={() => setShowKSH(!showKSH)} 
+              variant="outline" 
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              {showKSH ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
+              {showKSH ? 'KSH' : 'ETH'}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -166,13 +209,21 @@ export const WalletPayment = () => {
                   )}
                 </CardTitle>
                 <CardDescription>
-                  Monthly Premium: {plan.price} ETH
+                  Monthly Premium: {formatPrice(plan.price)}
+                  {showKSH && (
+                    <span className="block text-xs text-muted-foreground mt-1">
+                      ({plan.price} ETH)
+                    </span>
+                  )}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Coverage Limit:</p>
-                  <p className="font-semibold">{plan.coverage} ETH</p>
+                  <p className="font-semibold">{formatPrice(plan.coverage)}</p>
+                  {showKSH && (
+                    <p className="text-xs text-muted-foreground">({plan.coverage} ETH)</p>
+                  )}
                 </div>
                 
                 <div>
@@ -199,7 +250,7 @@ export const WalletPayment = () => {
                     </>
                   ) : (
                     <>
-                      Pay {plan.price} ETH
+                      Pay {formatPrice(plan.price)}
                     </>
                   )}
                 </Button>
@@ -225,8 +276,10 @@ export const WalletPayment = () => {
             <p><strong>Payment Recipient:</strong> 0xc3acc6de63F3Fb2D5a41D56320509e764a0B31fA</p>
             <p><strong>Network:</strong> Base Sepolia Testnet</p>
             <p><strong>Payment Method:</strong> Direct wallet transfer via smart contract</p>
+            <p><strong>Exchange Rate:</strong> 1 ETH ≈ KSh {ethToKshRate.toLocaleString()}</p>
             <p className="text-muted-foreground">
               Payments are processed instantly and sent directly to the insurance provider's wallet.
+              Exchange rates are updated every 5 minutes.
             </p>
           </div>
         </CardContent>
