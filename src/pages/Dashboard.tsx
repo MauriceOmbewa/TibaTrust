@@ -6,28 +6,40 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useApp } from '@/contexts/AppContext';
+import { useUnifiedAuth } from '@/hooks/useUnifiedAuth';
 import { Navigate } from 'react-router-dom';
 import { Heart, Shield, Users, CreditCard, FileText, Search, Send, UserPlus, CheckCircle, XCircle, Coins } from 'lucide-react';
 import { MpesaPayment } from '@/components/payment/MpesaPayment';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import UserSearch from '@/components/dashboard/UserSearch';
+import { BlockchainTest } from '@/components/BlockchainTest';
 
 const Dashboard = () => {
   const { user } = useApp();
+  const { isAuthenticated, currentUser, authType } = useUnifiedAuth();
   const { toast } = useToast();
   const [tokenAmount, setTokenAmount] = useState('');
   const [recipientUID, setRecipientUID] = useState('');
   const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/blockchain-login" replace />;
   }
+
+  const displayUser = authType === 'firebase' ? user : {
+    firstName: currentUser?.address?.slice(0, 6) || 'User',
+    lastName: '',
+    email: currentUser?.address || '',
+    id: currentUser?.address || '',
+    phone: currentUser?.address || 'N/A',
+    plan: 'Blockchain User'
+  };
 
   // Mock data
   const userProfile = {
-    ...user,
-    uid: 'UID' + user.id.padStart(6, '0'),
+    ...displayUser,
+    uid: authType === 'blockchain' ? currentUser?.address?.slice(-8) : 'UID' + displayUser.id.padStart(6, '0'),
     tokens: 2500,
     coverageStatus: 'Active',
     memberSince: '2024-01-01',
@@ -65,8 +77,18 @@ const Dashboard = () => {
       <div className="min-h-screen bg-background py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground">Welcome back, {user.firstName}!</h1>
-            <p className="text-muted-foreground">Manage your healthcare coverage and community connections.</p>
+            <h1 className="text-3xl font-bold text-foreground">Welcome back, {displayUser.firstName}!</h1>
+            <p className="text-muted-foreground">
+              {authType === 'blockchain' ? 'Blockchain authenticated' : 'Traditional authenticated'} - 
+              Manage your healthcare coverage and community connections.
+            </p>
+            {authType === 'blockchain' && (
+              <div className="mt-2 p-2 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-700">
+                  <strong>Wallet:</strong> {currentUser?.address}
+                </p>
+              </div>
+            )}
           </div>
 
           <Tabs defaultValue="overview" className="space-y-6">
@@ -242,6 +264,7 @@ const Dashboard = () => {
             </TabsContent>
 
             <TabsContent value="profile" className="space-y-6">
+              <BlockchainTest />
               <Card>
                 <CardHeader>
                   <CardTitle>Personal Information</CardTitle>
@@ -263,11 +286,11 @@ const Dashboard = () => {
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-muted-foreground">Phone</label>
-                      <p className="font-medium">{userProfile.phone}</p>
+                      <p className="font-medium">{userProfile.phone || 'N/A'}</p>
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-muted-foreground">Plan</label>
-                      <p className="font-medium">{userProfile.plan}</p>
+                      <p className="font-medium">{userProfile.plan || 'Standard'}</p>
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-muted-foreground">Coverage Status</label>
