@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "@/contexts/AppContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/FirebaseAuthContext";
+import { BlockchainAuthProvider } from "@/contexts/BlockchainAuthContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -15,6 +16,7 @@ import Donate from "./pages/Donate";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
+import BlockchainLogin from "./pages/BlockchainLogin";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Claims from "./pages/Claims";
@@ -26,7 +28,8 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
         <AuthProvider>
-          <AppProvider>
+          <BlockchainAuthProvider>
+            <AppProvider>
             <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -39,6 +42,7 @@ const App = () => (
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/blockchain-login" element={<BlockchainLogin />} />
               <Route path="/register" element={<Register />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/claims" element={<Claims />} />
@@ -47,7 +51,8 @@ const App = () => (
             </Routes>
           </BrowserRouter>
             </TooltipProvider>
-          </AppProvider>
+            </AppProvider>
+          </BlockchainAuthProvider>
         </AuthProvider>
       </LanguageProvider>
     </QueryClientProvider>
