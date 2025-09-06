@@ -42,28 +42,28 @@ const DashboardLayout = ({ children, activeTab, onTabChange }: DashboardLayoutPr
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg flex flex-col border-r">
+      <div className="w-64 bg-primary shadow-lg flex flex-col border-r">
         {/* Header */}
-        <div className="p-6 border-b">
+        <div className="p-6 border-b border-primary-foreground/20">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-              <Heart className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 bg-highlight rounded-full flex items-center justify-center">
+              <Heart className="w-5 h-5 text-primary" />
             </div>
-            <span className="text-xl font-bold text-gray-900">TibaTrust</span>
+            <span className="text-xl font-bold text-primary-foreground">TibaTrust</span>
           </div>
-          <p className="text-sm text-gray-500 mt-1">Management Dashboard</p>
+          <p className="text-sm text-primary-foreground/70 mt-1">Management Dashboard</p>
         </div>
 
         {/* User Info */}
-        <div className="p-6 border-b">
+        <div className="p-6 border-b border-primary-foreground/20">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <User className="w-5 h-5 text-blue-600" />
+            <div className="w-10 h-10 bg-highlight rounded-full flex items-center justify-center">
+              <User className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-gray-900 font-medium">{displayUser?.firstName}</p>
+              <p className="text-primary-foreground font-medium">{displayUser?.firstName}</p>
               <div className="flex items-center gap-2">
-                <p className="text-gray-500 text-sm">
+                <p className="text-primary-foreground/70 text-sm">
                   {authType === 'blockchain' ? 'Web3 User' : 'Standard User'}
                 </p>
                 {authType === 'blockchain' && (
@@ -87,8 +87,8 @@ const DashboardLayout = ({ children, activeTab, onTabChange }: DashboardLayoutPr
                   onClick={() => onTabChange(tab.id)}
                   className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
                     isActive 
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200' 
-                      : 'text-gray-700 hover:bg-gray-50'
+                      ? 'bg-highlight text-primary font-medium' 
+                      : 'text-primary-foreground hover:bg-primary-foreground/10'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -100,11 +100,11 @@ const DashboardLayout = ({ children, activeTab, onTabChange }: DashboardLayoutPr
         </nav>
 
         {/* Logout */}
-        <div className="p-4 border-t">
+        <div className="p-4 border-t border-primary-foreground/20">
           <Button
             onClick={handleLogout}
             variant="ghost"
-            className="w-full text-gray-700 hover:bg-gray-50 justify-start"
+            className="w-full text-primary-foreground hover:bg-primary-foreground/10 justify-start"
           >
             <LogOut className="w-4 h-4 mr-3" />
             Logout
