@@ -7,6 +7,7 @@ import { AppProvider } from "@/contexts/AppContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/FirebaseAuthContext";
 import { BlockchainAuthProvider } from "@/contexts/BlockchainAuthContext";
+import { useUnifiedAuth } from "@/hooks/useUnifiedAuth";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -23,6 +24,33 @@ import Claims from "./pages/Claims";
 
 const queryClient = new QueryClient();
 
+const AppContent = () => {
+  const { isAuthenticated } = useUnifiedAuth();
+
+  // If authenticated, show only the dashboard (management system)
+  if (isAuthenticated) {
+    return <Dashboard />;
+  }
+
+  // If not authenticated, show the public website
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/how-it-works" element={<HowItWorks />} />
+      <Route path="/insurance" element={<Insurance />} />
+      <Route path="/donate" element={<Donate />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/blockchain-login" element={<BlockchainLogin />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/claims" element={<Claims />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -30,27 +58,13 @@ const App = () => (
         <AuthProvider>
           <BlockchainAuthProvider>
             <AppProvider>
-            <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/how-it-works" element={<HowItWorks />} />
-              <Route path="/insurance" element={<Insurance />} />
-              <Route path="/donate" element={<Donate />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/blockchain-login" element={<BlockchainLogin />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/claims" element={<Claims />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-            </TooltipProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <AppContent />
+                </BrowserRouter>
+              </TooltipProvider>
             </AppProvider>
           </BlockchainAuthProvider>
         </AuthProvider>
