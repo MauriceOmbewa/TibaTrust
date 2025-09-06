@@ -40,9 +40,9 @@ const DashboardLayout = ({ children, activeTab, onTabChange }: DashboardLayoutPr
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <div className="w-64 bg-primary shadow-lg flex flex-col border-r">
+      <div className="w-64 bg-primary shadow-lg flex flex-col border-r fixed h-full">
         {/* Header */}
         <div className="p-6 border-b border-primary-foreground/20">
           <div className="flex items-center space-x-2">
@@ -113,7 +113,7 @@ const DashboardLayout = ({ children, activeTab, onTabChange }: DashboardLayoutPr
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 bg-white">
+      <div className="flex-1 bg-white ml-64 overflow-y-auto">
         {children}
       </div>
     </div>
