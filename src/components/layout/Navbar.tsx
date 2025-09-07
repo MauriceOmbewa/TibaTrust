@@ -110,11 +110,6 @@ const Navbar = () => {
               </div>
             ) : (
               <>
-                <Link to="/blockchain-login">
-                  <Button variant="secondary" size="sm">
-                    Connect Wallet
-                  </Button>
-                </Link>
                 <Link to="/login">
                   <Button variant="outline" size="sm">
                     {t('nav.login')}
@@ -202,11 +197,6 @@ const Navbar = () => {
                   </>
                 ) : (
                   <>
-                    <Link to="/blockchain-login" onClick={() => setIsOpen(false)}>
-                      <Button variant="secondary" className="w-full">
-                        Connect Wallet
-                      </Button>
-                    </Link>
                     <Link to="/login" onClick={() => setIsOpen(false)}>
                       <Button variant="outline" className="w-full">
                         {t('nav.login')}
