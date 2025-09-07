@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Heart, BarChart3, CreditCard, Users, Coins, User, LogOut } from 'lucide-react';
-import { useUnifiedAuth } from '@/hooks/useUnifiedAuth';
 import { useApp } from '@/contexts/AppContext';
 import { useBlockchainAuth } from '@/contexts/BlockchainAuthContext';
 
@@ -13,23 +12,15 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children, activeTab, onTabChange }: DashboardLayoutProps) => {
   const navigate = useNavigate();
-  const { currentUser, authType } = useUnifiedAuth();
-  const { logout: firebaseLogout } = useApp();
-  const { logout: blockchainLogout } = useBlockchainAuth();
+  const { user, logout } = useApp();
+  const { user: walletUser } = useBlockchainAuth();
 
   const handleLogout = () => {
-    if (authType === 'blockchain') {
-      blockchainLogout();
-    } else {
-      firebaseLogout();
-    }
+    logout();
     navigate('/');
   };
 
-  const displayUser = authType === 'firebase' ? currentUser?.data : {
-    firstName: currentUser?.address?.slice(0, 6) || 'User',
-    lastName: ''
-  };
+  const displayUser = user;
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
@@ -62,12 +53,19 @@ const DashboardLayout = ({ children, activeTab, onTabChange }: DashboardLayoutPr
             </div>
             <div>
               <p className="text-primary-foreground font-medium">{displayUser?.firstName}</p>
-              <div className="flex items-center gap-2">
-                <p className="text-primary-foreground/70 text-sm">
-                  {authType === 'blockchain' ? 'Web3 User' : 'Standard User'}
-                </p>
-                {authType === 'blockchain' && (
-                  <span className="text-xs bg-blue-500 px-2 py-1 rounded text-white">Web3</span>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-primary-foreground/70 text-sm">
+                    {walletUser?.address ? 'Wallet Connected' : 'No Wallet'}
+                  </p>
+                  {walletUser?.address && (
+                    <span className="text-xs bg-green-500 px-2 py-1 rounded text-white">MetaMask</span>
+                  )}
+                </div>
+                {walletUser?.address && (
+                  <p className="text-xs text-primary-foreground/60 font-mono">
+                    {walletUser.address.slice(0, 8)}...{walletUser.address.slice(-6)}
+                  </p>
                 )}
               </div>
             </div>
