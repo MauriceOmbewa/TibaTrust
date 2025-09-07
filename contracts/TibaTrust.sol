@@ -45,10 +45,10 @@ contract TibaTrust is ERC20, Ownable, ReentrancyGuard {
     event DonationReceived(address indexed donor, uint256 amount);
     
     constructor() ERC20("TibaTrust Token", "TTT") Ownable(msg.sender) {
-        // Initialize insurance plans
-        plans[1] = InsurancePlan(500 * 10**18, 50000 * 10**18, true); // Basic
-        plans[2] = InsurancePlan(1000 * 10**18, 100000 * 10**18, true); // Standard
-        plans[3] = InsurancePlan(2500 * 10**18, 250000 * 10**18, true); // Premium
+        // Initialize insurance plans (prices in wei)
+        plans[1] = InsurancePlan(400 * 10**15, 50000 * 10**18, true); // Basic - 0.0004 ETH (~$1)
+        plans[2] = InsurancePlan(800 * 10**15, 100000 * 10**18, true); // Standard - 0.0008 ETH (~$2)
+        plans[3] = InsurancePlan(1200 * 10**15, 250000 * 10**18, true); // Premium - 0.0012 ETH (~$3)
     }
     
     function registerUser(uint256 _planId) external payable {
@@ -69,6 +69,8 @@ contract TibaTrust is ERC20, Ownable, ReentrancyGuard {
     
     address public constant PAYMENT_RECIPIENT = 0xc3acc6de63F3Fb2D5a41D56320509e764a0B31fA;
     
+    event PaymentSent(address indexed recipient, uint256 amount, uint256 planId);
+    
     function payPremium() external payable {
         require(users[msg.sender].active, "User not registered");
         require(msg.value >= plans[users[msg.sender].planId].monthlyPremium, "Insufficient premium");
@@ -81,6 +83,7 @@ contract TibaTrust is ERC20, Ownable, ReentrancyGuard {
         
         _mint(msg.sender, 100 * 10**18); // Loyalty tokens
         emit PremiumPaid(msg.sender, msg.value);
+        emit PaymentSent(PAYMENT_RECIPIENT, msg.value, users[msg.sender].planId);
     }
     
     function payPremiumForPlan(uint256 _planId) external payable {
@@ -109,6 +112,7 @@ contract TibaTrust is ERC20, Ownable, ReentrancyGuard {
         payable(PAYMENT_RECIPIENT).transfer(msg.value);
         
         emit PremiumPaid(msg.sender, msg.value);
+        emit PaymentSent(PAYMENT_RECIPIENT, msg.value, _planId);
     }
     
     function submitClaim(uint256 _amount, string memory _description) external {
