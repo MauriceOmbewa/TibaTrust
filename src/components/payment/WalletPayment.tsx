@@ -5,8 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Wallet, Loader2, CheckCircle, AlertCircle, ToggleLeft, ToggleRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useBlockchainAuth } from '@/contexts/BlockchainAuthContext';
-import { payPremiumForPlan, getWalletBalance } from '@/services/blockchain/contract';
-import { formatEther, parseEther, getCurrentNetwork, switchToCorrectNetwork } from '@/services/blockchain/web3';
+import { getWalletBalance } from '@/services/blockchain/contract';
+import { formatEther, parseEther, getCurrentNetwork, switchToCorrectNetwork, getSigner } from '@/services/blockchain/web3';
 import { CurrencyService } from '@/services/currency';
 
 interface InsurancePlan {
@@ -23,21 +23,21 @@ const INSURANCE_PLANS: InsurancePlan[] = [
   {
     id: 1,
     name: 'Basic',
-    price: '0.0005',
+    price: '0.0004',
     coverage: '0.05',
     features: ['Basic medical coverage', 'Emergency care', 'Prescription drugs']
   },
   {
     id: 2,
     name: 'Standard',
-    price: '0.001',
+    price: '0.0008',
     coverage: '0.1',
     features: ['All Basic features', 'Specialist consultations', 'Diagnostic tests', 'Dental care']
   },
   {
     id: 3,
     name: 'Premium',
-    price: '0.0025',
+    price: '0.0012',
     coverage: '0.25',
     features: ['All Standard features', 'Surgery coverage', 'International treatment', 'Mental health']
   }
@@ -165,8 +165,12 @@ export const WalletPayment = () => {
         return;
       }
 
-      // Make payment
-      const tx = await payPremiumForPlan(planId, price);
+      // Make direct payment to recipient address
+      const signer = await getSigner();
+      const tx = await signer.sendTransaction({
+        to: '0xc3acc6de63F3Fb2D5a41D56320509e764a0B31fA',
+        value: parseEther(price)
+      });
       
       toast({
         title: 'Payment Successful!',
@@ -342,7 +346,7 @@ export const WalletPayment = () => {
             <p><strong>Exchange Rate:</strong> 1 ETH ≈ KSh {ethToKshRate.toLocaleString()}</p>
             <p className="text-muted-foreground">
               Payments are processed instantly and sent directly to the insurance provider's wallet.
-              Exchange rates are updated every 5 minutes.
+              Exchange rates are updated every 5 minutes. You can monitor transactions in real-time.
             </p>
           </div>
         </CardContent>
