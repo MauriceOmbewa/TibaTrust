@@ -10,6 +10,7 @@ import { Navigate } from 'react-router-dom';
 import { Send, UserPlus, CheckCircle, XCircle, Coins } from 'lucide-react';
 import { MpesaPayment } from '@/components/payment/MpesaPayment';
 import { WalletPayment } from '@/components/payment/WalletPayment';
+import { TransactionMonitor } from '@/components/payment/TransactionMonitor';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import UserSearch from '@/components/dashboard/UserSearch';
@@ -146,7 +147,9 @@ const Dashboard = () => {
 
       case 'payment':
         return (
-          <Tabs defaultValue="wallet" className="space-y-4">
+          <div className="space-y-6">
+            <TransactionMonitor />
+            <Tabs defaultValue="wallet" className="space-y-4">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="wallet">Wallet Payment</TabsTrigger>
               <TabsTrigger value="mpesa">M-Pesa Payment</TabsTrigger>
@@ -185,7 +188,8 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-          </Tabs>
+            </Tabs>
+          </div>
         );
 
       case 'communities':
