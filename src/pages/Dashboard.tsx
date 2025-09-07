@@ -11,6 +11,7 @@ import { Send, UserPlus, CheckCircle, XCircle, Coins } from 'lucide-react';
 import { MpesaPayment } from '@/components/payment/MpesaPayment';
 import { WalletPayment } from '@/components/payment/WalletPayment';
 import { TransactionMonitor } from '@/components/payment/TransactionMonitor';
+import { WalletConnector } from '@/components/auth/WalletConnector';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import UserSearch from '@/components/dashboard/UserSearch';
@@ -279,6 +280,7 @@ const Dashboard = () => {
       case 'profile':
         return (
           <div className="space-y-6">
+            <WalletConnector />
             <BlockchainTest />
             <Card>
               <CardHeader>
