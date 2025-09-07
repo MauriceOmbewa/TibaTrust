@@ -8,6 +8,7 @@ interface BlockchainAuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: () => Promise<boolean>;
+  connectWallet: () => Promise<boolean>;
   logout: () => void;
   userInfo: any;
 }
@@ -61,6 +62,10 @@ export const BlockchainAuthProvider: React.FC<{ children: React.ReactNode }> = (
     }
   };
 
+  const connectWallet = async (): Promise<boolean> => {
+    return await login();
+  };
+
   const logout = () => {
     BlockchainAuth.logout();
     setUser(null);
@@ -108,6 +113,7 @@ export const BlockchainAuthProvider: React.FC<{ children: React.ReactNode }> = (
     isAuthenticated: !!user,
     isLoading,
     login,
+    connectWallet,
     logout,
     userInfo
   };
