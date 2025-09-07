@@ -1,4 +1,7 @@
-import { getContract, parseEther, formatEther, getProvider } from './web3';
+import { getContract, parseEther, formatEther, getProvider, getSigner, CONTRACT_ABI } from './web3';
+import { ethers } from 'ethers';
+
+const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '';
 
 export interface InsurancePlan {
   id: number;
@@ -47,18 +50,34 @@ export const payPremium = async (premiumAmount: string) => {
 };
 
 export const payPremiumForPlan = async (planId: number, premiumAmount: string) => {
-  const contract = await getContract();
-  const tx = await contract.payPremiumForPlan(planId, {
-    value: parseEther(premiumAmount)
-  });
-  return await tx.wait();
+  try {
+    const signer = await getSigner();
+    
+    if (!CONTRACT_ADDRESS || CONTRACT_ADDRESS === '0x0000000000000000000000000000000000000000') {
+      throw new Error('Contract not deployed yet. Please deploy the smart contract first.');
+    }
+    
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    const tx = await contract.payPremiumForPlan(planId, {
+      value: parseEther(premiumAmount)
+    });
+    return await tx.wait();
+  } catch (error: any) {
+    console.error('Payment failed:', error);
+    throw new Error(`Payment failed: ${error.message}`);
+  }
 };
 
 export const getWalletBalance = async (address: string): Promise<string> => {
-  const provider = getProvider();
-  if (!provider) throw new Error('No provider available');
-  const balance = await provider.getBalance(address);
-  return formatEther(balance);
+  try {
+    const provider = getProvider();
+    if (!provider) throw new Error('No provider available');
+    const balance = await provider.getBalance(address);
+    return formatEther(balance);
+  } catch (error: any) {
+    console.error('Error getting wallet balance:', error);
+    throw new Error(`Failed to get wallet balance: ${error.message}`);
+  }
 };
 
 export const submitClaim = async (amount: string, description: string) => {
