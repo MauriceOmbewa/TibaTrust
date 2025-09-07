@@ -125,42 +125,7 @@ const Login = () => {
             </div>
           </form>
           
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/20"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-transparent text-primary-foreground/80">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-            
-            <div className="mt-6 space-y-3">
-              <Link to="/blockchain-login">
-                <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700">
-                  <Wallet className="w-4 h-4 mr-2" />
-                  Connect Wallet (Blockchain)
-                </Button>
-              </Link>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  className="w-full inline-flex justify-center py-2 px-4 border border-white/20 rounded-lg shadow-sm bg-white/10 text-sm font-medium text-primary-foreground hover:bg-white/20"
-                >
-                  Google
-                </button>
-                <button
-                  type="button"
-                  className="w-full inline-flex justify-center py-2 px-4 border border-white/20 rounded-lg shadow-sm bg-white/10 text-sm font-medium text-primary-foreground hover:bg-white/20"
-                >
-                  M-Pesa
-                </button>
-              </div>
-            </div>
-          </div>
+
         </div>
         
         {/* Register Link */}
