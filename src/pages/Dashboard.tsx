@@ -15,7 +15,7 @@ import { WalletConnector } from '@/components/auth/WalletConnector';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import UserSearch from '@/components/dashboard/UserSearch';
-import { BlockchainTest } from '@/components/BlockchainTest';
+
 
 const Dashboard = () => {
   const { user } = useApp();
@@ -281,7 +281,6 @@ const Dashboard = () => {
         return (
           <div className="space-y-6">
             <WalletConnector />
-            <BlockchainTest />
             <Card>
               <CardHeader>
                 <CardTitle>Personal Information</CardTitle>
