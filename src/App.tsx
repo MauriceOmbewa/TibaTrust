@@ -7,7 +7,7 @@ import { AppProvider } from "@/contexts/AppContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/FirebaseAuthContext";
 import { BlockchainAuthProvider } from "@/contexts/BlockchainAuthContext";
-import { useUnifiedAuth } from "@/hooks/useUnifiedAuth";
+import { useApp } from "@/contexts/AppContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -17,7 +17,6 @@ import Donate from "./pages/Donate";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
-import BlockchainLogin from "./pages/BlockchainLogin";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Claims from "./pages/Claims";
@@ -25,10 +24,10 @@ import Claims from "./pages/Claims";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  const { isAuthenticated } = useUnifiedAuth();
+  const { user } = useApp();
 
-  // If authenticated, show only the dashboard (management system)
-  if (isAuthenticated) {
+  // If authenticated with Firebase, show dashboard
+  if (user) {
     return <Dashboard />;
   }
 
@@ -42,7 +41,6 @@ const AppContent = () => {
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/blockchain-login" element={<BlockchainLogin />} />
       <Route path="/register" element={<Register />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/claims" element={<Claims />} />
