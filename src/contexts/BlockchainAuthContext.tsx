@@ -44,10 +44,7 @@ export const BlockchainAuthProvider: React.FC<{ children: React.ReactNode }> = (
         // Continue without contract info - user can still use basic features
       }
       
-      toast({
-        title: 'Success',
-        description: 'Wallet connected and authenticated!'
-      });
+      // Don't show toast here - let WalletConnector handle it
       
       return true;
     } catch (error: any) {
@@ -63,7 +60,26 @@ export const BlockchainAuthProvider: React.FC<{ children: React.ReactNode }> = (
   };
 
   const connectWallet = async (): Promise<boolean> => {
-    return await login();
+    setIsLoading(true);
+    try {
+      const authenticatedUser = await BlockchainAuth.authenticateWithWallet();
+      setUser(authenticatedUser);
+      
+      // Get user info from contract
+      try {
+        const info = await getUserInfo(authenticatedUser.address);
+        setUserInfo(info);
+      } catch (error) {
+        console.log('User not registered on contract yet:', error);
+      }
+      
+      return true;
+    } catch (error: any) {
+      // Don't show success toast on error
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = () => {
