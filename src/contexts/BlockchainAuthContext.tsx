@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { BlockchainAuth, BlockchainUser } from '@/services/blockchain/auth';
-import { getUserInfo } from '@/services/blockchain/contract';
 import { useToast } from '@/hooks/use-toast';
 
 interface BlockchainAuthContextType {
@@ -35,15 +34,6 @@ export const BlockchainAuthProvider: React.FC<{ children: React.ReactNode }> = (
       const authenticatedUser = await BlockchainAuth.authenticateWithWallet();
       setUser(authenticatedUser);
       
-      // Get user info from contract
-      try {
-        const info = await getUserInfo(authenticatedUser.address);
-        setUserInfo(info);
-      } catch (error) {
-        console.log('User not registered on contract yet:', error);
-        // Continue without contract info - user can still use basic features
-      }
-      
       // Don't show toast here - let WalletConnector handle it
       
       return true;
@@ -64,14 +54,6 @@ export const BlockchainAuthProvider: React.FC<{ children: React.ReactNode }> = (
     try {
       const authenticatedUser = await BlockchainAuth.authenticateWithWallet();
       setUser(authenticatedUser);
-      
-      // Get user info from contract
-      try {
-        const info = await getUserInfo(authenticatedUser.address);
-        setUserInfo(info);
-      } catch (error) {
-        console.log('User not registered on contract yet:', error);
-      }
       
       return true;
     } catch (error: any) {
@@ -102,14 +84,6 @@ export const BlockchainAuthProvider: React.FC<{ children: React.ReactNode }> = (
           const isValid = await BlockchainAuth.verifyStoredAuth();
           if (isValid) {
             setUser(storedUser);
-            
-            // Get user info from contract
-            try {
-              const info = await getUserInfo(storedUser.address);
-              setUserInfo(info);
-            } catch (error) {
-              console.log('User not registered on contract yet');
-            }
           } else {
             BlockchainAuth.logout();
           }
