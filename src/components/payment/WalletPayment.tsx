@@ -8,6 +8,8 @@ import { useBlockchainAuth } from '@/contexts/BlockchainAuthContext';
 import { getWalletBalance } from '@/services/blockchain/contract';
 import { formatEther, parseEther, getCurrentNetwork, switchToCorrectNetwork, getSigner } from '@/services/blockchain/web3';
 import { CurrencyService } from '@/services/currency';
+import { UserDataService } from '@/services/userDataService';
+import { useApp } from '@/contexts/AppContext';
 
 interface InsurancePlan {
   id: number;
@@ -50,7 +52,8 @@ export const WalletPayment = () => {
   const [showKSH, setShowKSH] = useState(false);
   const [ethToKshRate, setEthToKshRate] = useState<number>(400000);
   const [currentNetwork, setCurrentNetwork] = useState<any>(null);
-  const { user } = useBlockchainAuth();
+  const { user: firebaseUser } = useApp();
+  const { user: walletUser } = useBlockchainAuth();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -60,11 +63,11 @@ export const WalletPayment = () => {
     });
     
     // Check network on mount
-    if (user?.address) {
+    if (walletUser?.address) {
       checkNetwork();
       checkBalance();
     }
-  }, [user?.address]);
+  }, [walletUser?.address]);
 
   const formatPrice = (ethPrice: string) => {
     const eth = parseFloat(ethPrice);
@@ -85,10 +88,10 @@ export const WalletPayment = () => {
   };
 
   const checkBalance = async () => {
-    if (!user?.address) return;
+    if (!walletUser?.address) return;
     
     try {
-      const balance = await getWalletBalance(user.address);
+      const balance = await getWalletBalance(walletUser.address);
       setWalletBalance(balance);
     } catch (error) {
       console.error('Failed to get wallet balance:', error);
@@ -125,7 +128,16 @@ export const WalletPayment = () => {
   };
 
   const handlePayment = async (planId: number, price: string) => {
-    if (!user?.address) {
+    if (!firebaseUser) {
+      toast({
+        title: 'Error',
+        description: 'Please login first',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (!walletUser?.address) {
       toast({
         title: 'Error',
         description: 'Please connect your wallet first',
@@ -172,6 +184,10 @@ export const WalletPayment = () => {
         value: parseEther(price)
       });
       
+      // Record payment in user data service
+      const userId = firebaseUser.id || firebaseUser.email;
+      UserDataService.addPayment(userId, planId, price, tx.hash);
+      
       toast({
         title: 'Payment Successful!',
         description: `Premium paid for ${INSURANCE_PLANS.find(p => p.id === planId)?.name} plan. Transaction: ${tx.hash}`,
@@ -194,11 +210,12 @@ export const WalletPayment = () => {
   };
 
   // Check balance on component mount
-  useState(() => {
-    if (user?.address) {
+  useEffect(() => {
+    if (walletUser?.address) {
       checkBalance();
+      checkNetwork();
     }
-  });
+  }, [walletUser?.address]);
 
   return (
     <div className="space-y-6">
@@ -214,7 +231,12 @@ export const WalletPayment = () => {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">Address:</span>
-              <span className="text-sm font-mono">{user?.address?.slice(0, 6)}...{user?.address?.slice(-4)}</span>
+              <span className="text-sm font-mono">
+                {walletUser?.address ? 
+                  `${walletUser.address.slice(0, 6)}...${walletUser.address.slice(-4)}` : 
+                  'Not connected'
+                }
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">Balance:</span>
