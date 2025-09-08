@@ -12,6 +12,7 @@ import { MpesaPayment } from '@/components/payment/MpesaPayment';
 import { WalletPayment } from '@/components/payment/WalletPayment';
 import { TransactionMonitor } from '@/components/payment/TransactionMonitor';
 import { WalletConnector } from '@/components/auth/WalletConnector';
+import { UserDataService } from '@/services/userDataService';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import UserSearch from '@/components/dashboard/UserSearch';
@@ -39,15 +40,22 @@ const Dashboard = () => {
     plan: 'Blockchain User'
   };
 
-  // Mock data
+  // Real user data
+  const userId = displayUser.id || displayUser.email;
+  const coverageStatus = UserDataService.getCoverageStatus(userId);
+  const nextPaymentDate = UserDataService.getNextPaymentDate(userId);
+  const memberSince = UserDataService.getMemberSince(userId);
+  const totalTokens = UserDataService.getTotalTokens(userId);
+  const activePlan = UserDataService.getActivePlan(userId);
+  
   const userProfile = {
     ...displayUser,
-    uid: authType === 'blockchain' ? currentUser?.address?.slice(-8) : 'UID' + displayUser.id.padStart(6, '0'),
-    tokens: 2500,
-    coverageStatus: 'Active',
-    memberSince: '2024-01-01',
-    nextPaymentDue: '2024-02-01',
-    monthlyPremium: 1000
+    uid: 'UID' + userId.slice(-6),
+    tokens: totalTokens,
+    coverageStatus,
+    memberSince: memberSince || 'Not a member yet',
+    nextPaymentDue: nextPaymentDate || 'No payments made',
+    monthlyPremium: activePlan === 1 ? 'Basic Plan' : activePlan === 2 ? 'Standard Plan' : activePlan === 3 ? 'Premium Plan' : 'No active plan'
   };
 
   const availableCommunities = [
