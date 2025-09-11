@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { connectWallet, getContract, parseEther, CONTRACT_ADDRESS } from '@/services/blockchain/web3';
-import { getUserInfo, getTokenBalance } from '@/services/blockchain/contract';
+import { getTokenBalance } from '@/services/blockchain/contract';
 
 export const BlockchainTest = () => {
   const [wallet, setWallet] = useState<string>('');
@@ -16,9 +16,9 @@ export const BlockchainTest = () => {
       const address = await connectWallet();
       setWallet(address);
       
-      // Get user info
-      const info = await getUserInfo(address);
-      setUserInfo(info);
+      // Get user info - commented out to fix ENS error
+      // const info = await getUserInfo(address);
+      // setUserInfo(info);
       
       // Get token balance
       const balance = await getTokenBalance(address);
