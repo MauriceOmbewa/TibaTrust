@@ -189,7 +189,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <MpesaPayment 
-                      amount={userProfile.monthlyPremium}
+                      amount={500}
                       description="Monthly Insurance Premium"
                       onSuccess={handlePaymentSuccess}
                     />
