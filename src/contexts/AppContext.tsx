@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { useToast } from '@/hooks/use-toast';
 import { validateLoginForm, validateRegistrationForm, validateContactForm, ValidationError } from '@/utils/validation';
 import { useAuth } from './FirebaseAuthContext';
+import { useBlockchainAuth } from './BlockchainAuthContext';
 
 interface User {
   id: string;
@@ -36,6 +37,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { currentUser, login: firebaseLogin, register: firebaseRegister, logout: firebaseLogout } = useAuth();
+  const { logout: blockchainLogout } = useBlockchainAuth();
 
   const login = async (email: string, password: string): Promise<boolean> => {
     const validationErrors = validateLoginForm(email, password);
@@ -82,6 +84,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     await firebaseLogout();
     setUser(null);
     localStorage.removeItem('user');
+    
+    // Also disconnect blockchain wallet
+    blockchainLogout();
   };
 
   const submitContactForm = async (formData: any): Promise<boolean> => {
