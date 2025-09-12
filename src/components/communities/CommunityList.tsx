@@ -47,6 +47,10 @@ export const CommunityList = ({ userId, userCommunities, onUpdate }: CommunityLi
     return userCommunities.some(c => c.id === communityId);
   };
 
+  const hasUserRequested = (community: any) => {
+    return community.pendingRequests.includes(userId);
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -88,6 +92,8 @@ export const CommunityList = ({ userId, userCommunities, onUpdate }: CommunityLi
                     <div>
                       {isUserMember(community.id) ? (
                         <Badge variant="default">Member</Badge>
+                      ) : hasUserRequested(community) ? (
+                        <Badge variant="secondary">Requested</Badge>
                       ) : (
                         <Button size="sm" onClick={() => handleJoinRequest(community.id)}>
                           <UserPlus className="h-4 w-4 mr-1" />
