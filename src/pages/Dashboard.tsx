@@ -47,15 +47,18 @@ const Dashboard = () => {
   const memberSince = UserDataService.getMemberSince(userId);
   const totalTokens = UserDataService.getTotalTokens(userId);
   const activePlan = UserDataService.getActivePlan(userId);
+  const hasActivePlan = activePlan !== null;
   
   const userProfile = {
     ...displayUser,
     uid: 'UID' + userId.slice(-6),
     tokens: totalTokens,
     coverageStatus,
-    memberSince: memberSince || 'Not a member yet',
-    nextPaymentDue: nextPaymentDate || 'No payments made',
-    monthlyPremium: activePlan === 1 ? 'Basic Plan' : activePlan === 2 ? 'Standard Plan' : activePlan === 3 ? 'Premium Plan' : 'No active plan'
+    memberSince: memberSince || 'Not activated',
+    nextPaymentDue: hasActivePlan ? (nextPaymentDate ? new Date(nextPaymentDate).toLocaleDateString() : 'Calculating...') : 'Account not activated',
+    monthlyPremium: activePlan === 1 ? 500 : activePlan === 2 ? 1000 : activePlan === 3 ? 2500 : 500,
+    planName: activePlan === 1 ? 'Basic Plan' : activePlan === 2 ? 'Standard Plan' : activePlan === 3 ? 'Premium Plan' : 'No active plan',
+    hasActivePlan
   };
 
   const availableCommunities = [
@@ -80,7 +83,20 @@ const Dashboard = () => {
   };
 
   const handlePaymentSuccess = () => {
-    toast({ title: 'Payment Successful', description: 'Your monthly premium has been paid' });
+    const userId = displayUser.id || displayUser.email;
+    const planId = userProfile.hasActivePlan ? UserDataService.getActivePlan(userId) || 1 : 1; // Default to Basic plan
+    
+    // Record the payment
+    UserDataService.addPayment(userId, planId, userProfile.monthlyPremium.toString());
+    
+    const message = userProfile.hasActivePlan ? 
+      'Your monthly premium has been paid' : 
+      'Your plan has been activated successfully!';
+    
+    toast({ title: 'Payment Successful', description: message });
+    
+    // Refresh the page to show updated data
+    window.location.reload();
   };
 
   const renderTabContent = () => {
@@ -132,11 +148,18 @@ const Dashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Next Payment</CardTitle>
-                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                  {userProfile.hasActivePlan ? 
+                    <CheckCircle className="h-4 w-4 text-green-600" /> : 
+                    <XCircle className="h-4 w-4 text-orange-600" />
+                  }
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">Feb 1</div>
-                  <p className="text-xs text-muted-foreground">KSh {userProfile.monthlyPremium}</p>
+                  <div className="text-2xl font-bold">
+                    {userProfile.hasActivePlan ? userProfile.nextPaymentDue : 'Not Active'}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {userProfile.hasActivePlan ? `KSh ${userProfile.monthlyPremium}` : 'Activate your plan'}
+                  </p>
                 </CardContent>
               </Card>
 
@@ -178,19 +201,23 @@ const Dashboard = () => {
                   <div className="p-4 border rounded-lg">
                     <div className="flex justify-between items-center mb-4">
                       <div>
-                        <h3 className="font-medium">Monthly Premium</h3>
-                        <p className="text-sm text-muted-foreground">Due: {userProfile.nextPaymentDue}</p>
+                        <h3 className="font-medium">
+                          {userProfile.hasActivePlan ? 'Monthly Premium' : 'Activate Your Plan'}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {userProfile.hasActivePlan ? `Due: ${userProfile.nextPaymentDue}` : 'Choose a plan to get started'}
+                        </p>
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold">KSh {userProfile.monthlyPremium}</div>
-                        <Badge variant={userProfile.coverageStatus === 'Active' ? 'default' : 'destructive'}>
-                          {userProfile.coverageStatus}
+                        <Badge variant={userProfile.hasActivePlan && userProfile.coverageStatus === 'Active' ? 'default' : 'destructive'}>
+                          {userProfile.hasActivePlan ? userProfile.coverageStatus : 'Not Activated'}
                         </Badge>
                       </div>
                     </div>
                     <MpesaPayment 
-                      amount={500}
-                      description="Monthly Insurance Premium"
+                      amount={userProfile.monthlyPremium}
+                      description={userProfile.hasActivePlan ? 'Monthly Insurance Premium' : 'Plan Activation Payment'}
                       onSuccess={handlePaymentSuccess}
                     />
                   </div>
