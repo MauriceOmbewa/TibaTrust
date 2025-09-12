@@ -61,12 +61,7 @@ const Dashboard = () => {
     hasActivePlan
   };
 
-  const availableCommunities = [
-    { id: '1', name: 'Nairobi Health Circle', members: 1250, description: 'Supporting healthcare in Nairobi region', joinStatus: 'available' },
-    { id: '2', name: 'Mombasa Care Network', members: 890, description: 'Coastal healthcare community', joinStatus: 'available' },
-    { id: '3', name: 'Kisumu Wellness Group', members: 650, description: 'Western Kenya health support', joinStatus: 'pending' },
-    { id: '4', name: 'Eldoret Medical Aid', members: 420, description: 'Rift Valley healthcare assistance', joinStatus: 'joined' }
-  ];
+  const availableCommunities: any[] = [];
 
   const handleTokenTransfer = () => {
     if (!recipientUID || !tokenAmount) {
@@ -166,11 +161,11 @@ const Dashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Communities</CardTitle>
-                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                  <XCircle className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{availableCommunities.filter(c => c.joinStatus === 'joined').length}</div>
-                  <p className="text-xs text-muted-foreground">Joined</p>
+                  <div className="text-2xl font-bold">0</div>
+                  <p className="text-xs text-muted-foreground">Coming Soon</p>
                 </CardContent>
               </Card>
             </div>
@@ -232,36 +227,17 @@ const Dashboard = () => {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Available Communities</CardTitle>
-              <CardDescription>Join healthcare communities to expand your support network</CardDescription>
+              <CardTitle>Healthcare Communities</CardTitle>
+              <CardDescription>Community features are coming soon</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {availableCommunities.map((community) => (
-                  <div key={community.id} className="p-4 border rounded-lg">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="font-medium">{community.name}</h3>
-                        <p className="text-sm text-muted-foreground mb-2">{community.description}</p>
-                        <p className="text-xs text-muted-foreground">{community.members} members</p>
-                      </div>
-                      <div className="ml-4">
-                        {community.joinStatus === 'joined' && (
-                          <Badge variant="default">Joined</Badge>
-                        )}
-                        {community.joinStatus === 'pending' && (
-                          <Badge variant="secondary">Pending</Badge>
-                        )}
-                        {community.joinStatus === 'available' && (
-                          <Button size="sm" onClick={() => handleJoinCommunity(community.id)}>
-                            <UserPlus className="h-4 w-4 mr-1" />
-                            Join
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="text-center py-12">
+                <UserPlus className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">Communities Coming Soon</h3>
+                <p className="text-muted-foreground mb-4">
+                  We're building community features to connect healthcare members and expand support networks.
+                </p>
+                <Badge variant="secondary">Feature in Development</Badge>
               </div>
             </CardContent>
           </Card>
