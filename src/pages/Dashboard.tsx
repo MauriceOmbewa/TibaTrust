@@ -16,6 +16,8 @@ import { UserDataService } from '@/services/userDataService';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import UserSearch from '@/components/dashboard/UserSearch';
+import { CommunityManager } from '@/components/communities/CommunityManager';
+import { CommunityService } from '@/services/communityService';
 
 
 const Dashboard = () => {
@@ -161,11 +163,11 @@ const Dashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Communities</CardTitle>
-                  <XCircle className="h-4 w-4 text-muted-foreground" />
+                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">0</div>
-                  <p className="text-xs text-muted-foreground">Coming Soon</p>
+                  <div className="text-2xl font-bold">{CommunityService.getUserCommunities(userId).length}</div>
+                  <p className="text-xs text-muted-foreground">Joined</p>
                 </CardContent>
               </Card>
             </div>
@@ -225,22 +227,7 @@ const Dashboard = () => {
 
       case 'communities':
         return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Healthcare Communities</CardTitle>
-              <CardDescription>Community features are coming soon</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <UserPlus className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">Communities Coming Soon</h3>
-                <p className="text-muted-foreground mb-4">
-                  We're building community features to connect healthcare members and expand support networks.
-                </p>
-                <Badge variant="secondary">Feature in Development</Badge>
-              </div>
-            </CardContent>
-          </Card>
+          <CommunityManager userId={userId} />
         );
 
       case 'tokens':
