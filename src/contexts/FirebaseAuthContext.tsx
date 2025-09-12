@@ -52,6 +52,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { user } = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(user, { displayName });
+      // Force refresh the user to get updated profile
+      await user.reload();
+      setCurrentUser(auth.currentUser);
       toast({ title: 'Success', description: 'Account created successfully!' });
       return true;
     } catch (error: any) {
