@@ -30,7 +30,7 @@ const Dashboard = () => {
   const [selectedCommunity, setSelectedCommunity] = useState<string | null>(null);
 
   if (!isAuthenticated) {
-    return <Navigate to="/blockchain-login" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   const displayUser = authType === 'firebase' ? user : {
