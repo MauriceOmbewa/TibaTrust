@@ -24,14 +24,6 @@ import Claims from "./pages/Claims";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  const { user } = useApp();
-
-  // If authenticated with Firebase, show dashboard
-  if (user) {
-    return <Dashboard />;
-  }
-
-  // If not authenticated, show the public website
   return (
     <Routes>
       <Route path="/" element={<Index />} />
