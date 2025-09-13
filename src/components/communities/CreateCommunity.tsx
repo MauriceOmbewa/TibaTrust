@@ -14,23 +14,27 @@ interface CreateCommunityProps {
 export const CreateCommunity = ({ userId, onCommunityCreated }: CreateCommunityProps) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [tokenContribution, setTokenContribution] = useState(50);
+  const [location, setLocation] = useState('');
+  const [category, setCategory] = useState('Regional');
+  const [maxMembers, setMaxMembers] = useState(100);
   const [isCreating, setIsCreating] = useState(false);
   const { toast } = useToast();
 
   const handleCreate = async () => {
-    if (!name.trim() || !description.trim()) {
-      toast({ title: 'Error', description: 'Please fill all fields', variant: 'destructive' });
+    if (!name.trim() || !description.trim() || !location.trim()) {
+      toast({ title: 'Error', description: 'Please fill all required fields', variant: 'destructive' });
       return;
     }
 
     setIsCreating(true);
     try {
-      const community = await CommunityService.createCommunity(name, description, userId, tokenContribution);
-      toast({ title: 'Success', description: `Community "${community.name}" created successfully!` });
+      const communityId = await CommunityService.createCommunity(name, description, location, category, maxMembers, userId);
+      toast({ title: 'Success', description: `Community "${name}" created successfully!` });
       setName('');
       setDescription('');
-      setTokenContribution(50);
+      setLocation('');
+      setCategory('Regional');
+      setMaxMembers(100);
       onCommunityCreated();
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -61,17 +65,37 @@ export const CreateCommunity = ({ userId, onCommunityCreated }: CreateCommunityP
             placeholder="Describe your community's purpose"
           />
         </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-medium">Location</label>
+            <Input
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="City, County"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Category</label>
+            <select 
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full p-2 border rounded-md"
+            >
+              <option value="Regional">Regional</option>
+              <option value="Professional">Professional</option>
+              <option value="Age Group">Age Group</option>
+              <option value="Special Interest">Special Interest</option>
+            </select>
+          </div>
+        </div>
         <div>
-          <label className="text-sm font-medium">Default Token Contribution</label>
+          <label className="text-sm font-medium">Max Members</label>
           <Input
             type="number"
-            value={tokenContribution}
-            onChange={(e) => setTokenContribution(Number(e.target.value))}
-            placeholder="Tokens per member for support"
+            value={maxMembers}
+            onChange={(e) => setMaxMembers(Number(e.target.value))}
+            placeholder="Maximum number of members"
           />
-          <p className="text-xs text-muted-foreground mt-1">
-            Amount deducted from each member when someone needs support
-          </p>
         </div>
         <Button onClick={handleCreate} disabled={isCreating} className="w-full">
           {isCreating ? 'Creating...' : 'Create Community'}
