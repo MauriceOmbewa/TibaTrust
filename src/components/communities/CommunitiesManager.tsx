@@ -1,72 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Plus, Users, MapPin, Calendar, Crown, UserCheck } from 'lucide-react';
+import { Search, Plus, Users, MapPin, Calendar, Crown, UserCheck, Loader2 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { CommunityService, CommunityWithStatus } from '@/services/communityService';
+import { useToast } from '@/hooks/use-toast';
 
-interface Community {
-  id: string;
-  name: string;
-  description: string;
-  location: string;
-  members: number;
-  maxMembers: number;
-  category: string;
-  isJoined: boolean;
-  isOwner: boolean;
-  createdAt: string;
-  avatar?: string;
-}
 
-const MOCK_COMMUNITIES: Community[] = [
-  {
-    id: '1',
-    name: 'Nairobi Health Circle',
-    description: 'Supporting healthcare access in Nairobi and surrounding areas',
-    location: 'Nairobi, Kenya',
-    members: 245,
-    maxMembers: 500,
-    category: 'Regional',
-    isJoined: true,
-    isOwner: false,
-    createdAt: '2024-01-15'
-  },
-  {
-    id: '2',
-    name: 'Young Professionals Health',
-    description: 'Healthcare support network for young working professionals',
-    location: 'Kenya',
-    members: 89,
-    maxMembers: 200,
-    category: 'Professional',
-    isJoined: false,
-    isOwner: false,
-    createdAt: '2024-02-01'
-  },
-  {
-    id: '3',
-    name: 'Mombasa Coastal Care',
-    description: 'Coastal region healthcare community',
-    location: 'Mombasa, Kenya',
-    members: 156,
-    maxMembers: 300,
-    category: 'Regional',
-    isJoined: true,
-    isOwner: true,
-    createdAt: '2024-01-20'
-  }
-];
 
 export const CommunitiesManager = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [communities, setCommunities] = useState<CommunityWithStatus[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({ name: '', description: '', location: '', category: 'Regional', maxMembers: 100 });
   const { user } = useApp();
+  const { toast } = useToast();
 
-  const myCommunities = MOCK_COMMUNITIES.filter(c => c.isJoined);
-  const availableCommunities = MOCK_COMMUNITIES.filter(c => !c.isJoined);
+  useEffect(() => {
+    loadCommunities();
+  }, [user]);
+
+  const loadCommunities = async () => {
+    if (!user) return;
+    try {
+      setLoading(true);
+      const data = await CommunityService.getCommunitiesWithStatus(user.id);
+      setCommunities(data);
+    } catch (error) {
+      console.error('Failed to load communities:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const myCommunities = communities.filter(c => c.isJoined);
+  const availableCommunities = communities.filter(c => !c.isJoined);
   
   const filteredAvailable = availableCommunities.filter(c =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -74,7 +46,36 @@ export const CommunitiesManager = () => {
     c.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const CommunityCard = ({ community, showJoinButton = false }: { community: Community; showJoinButton?: boolean }) => (
+  const handleJoinCommunity = async (communityId: string) => {
+    try {
+      await CommunityService.joinCommunity(communityId, user!.id);
+      toast({ title: 'Success', description: 'Joined community successfully!' });
+      loadCommunities();
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to join community', variant: 'destructive' });
+    }
+  };
+
+  const handleCreateCommunity = async () => {
+    try {
+      await CommunityService.createCommunity(
+        formData.name,
+        formData.description,
+        formData.location,
+        formData.category,
+        formData.maxMembers,
+        user!.id
+      );
+      toast({ title: 'Success', description: 'Community created successfully!' });
+      setShowCreateForm(false);
+      setFormData({ name: '', description: '', location: '', category: 'Regional', maxMembers: 100 });
+      loadCommunities();
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to create community', variant: 'destructive' });
+    }
+  };
+
+  const CommunityCard = ({ community, showJoinButton = false }: { community: CommunityWithStatus; showJoinButton?: boolean }) => (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader>
         <div className="flex items-start justify-between">
@@ -97,7 +98,7 @@ export const CommunitiesManager = () => {
             </div>
             <div className="flex items-center gap-1">
               <Users className="w-4 h-4" />
-              {community.members}/{community.maxMembers}
+              {community.memberCount}/{community.maxMembers}
             </div>
             <div className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
@@ -108,14 +109,19 @@ export const CommunitiesManager = () => {
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
               className="bg-primary h-2 rounded-full" 
-              style={{ width: `${(community.members / community.maxMembers) * 100}%` }}
+              style={{ width: `${(community.memberCount / community.maxMembers) * 100}%` }}
             />
           </div>
           
           {showJoinButton && (
-            <Button className="w-full" size="sm">
+            <Button 
+              className="w-full" 
+              size="sm"
+              onClick={() => handleJoinCommunity(community.id)}
+              disabled={community.memberCount >= community.maxMembers}
+            >
               <UserCheck className="w-4 h-4 mr-2" />
-              Join Community
+              {community.memberCount >= community.maxMembers ? 'Full' : 'Join Community'}
             </Button>
           )}
           
@@ -145,24 +151,47 @@ export const CommunitiesManager = () => {
       <CardContent className="space-y-4">
         <div>
           <label className="text-sm font-medium">Community Name</label>
-          <Input placeholder="Enter community name" />
+          <Input 
+            placeholder="Enter community name" 
+            value={formData.name}
+            onChange={(e) => setFormData({...formData, name: e.target.value})}
+          />
         </div>
         <div>
           <label className="text-sm font-medium">Description</label>
-          <Input placeholder="Describe your community's purpose" />
+          <Input 
+            placeholder="Describe your community's purpose" 
+            value={formData.description}
+            onChange={(e) => setFormData({...formData, description: e.target.value})}
+          />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium">Location</label>
-            <Input placeholder="City, County" />
+            <Input 
+              placeholder="City, County" 
+              value={formData.location}
+              onChange={(e) => setFormData({...formData, location: e.target.value})}
+            />
           </div>
           <div>
             <label className="text-sm font-medium">Max Members</label>
-            <Input type="number" placeholder="100" />
+            <Input 
+              type="number" 
+              placeholder="100" 
+              value={formData.maxMembers}
+              onChange={(e) => setFormData({...formData, maxMembers: parseInt(e.target.value) || 100})}
+            />
           </div>
         </div>
         <div className="flex gap-2">
-          <Button className="flex-1">Create Community</Button>
+          <Button 
+            className="flex-1" 
+            onClick={handleCreateCommunity}
+            disabled={!formData.name || !formData.description}
+          >
+            Create Community
+          </Button>
           <Button variant="outline" onClick={() => setShowCreateForm(false)}>
             Cancel
           </Button>
@@ -193,7 +222,11 @@ export const CommunitiesManager = () => {
         </TabsList>
 
         <TabsContent value="my-communities" className="space-y-4">
-          {myCommunities.length === 0 ? (
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin" />
+            </div>
+          ) : myCommunities.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <Users className="w-12 h-12 text-muted-foreground mb-4" />
@@ -229,7 +262,11 @@ export const CommunitiesManager = () => {
             </div>
           </div>
 
-          {filteredAvailable.length === 0 ? (
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin" />
+            </div>
+          ) : filteredAvailable.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <Search className="w-12 h-12 text-muted-foreground mb-4" />
