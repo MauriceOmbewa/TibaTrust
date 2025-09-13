@@ -1,3 +1,17 @@
+import { db } from '@/lib/firebase';
+import { 
+  collection, 
+  doc, 
+  getDocs, 
+  addDoc, 
+  updateDoc, 
+  query, 
+  where, 
+  arrayUnion, 
+  arrayRemove,
+  getDoc
+} from 'firebase/firestore';
+
 interface Community {
   id: string;
   name: string;
@@ -22,28 +36,20 @@ interface SupportRequest {
   contributors: { userId: string; amount: number }[];
 }
 
-const COMMUNITIES_KEY = 'tibatrust_communities';
-const SUPPORT_REQUESTS_KEY = 'tibatrust_support_requests';
-
 export class CommunityService {
-  static getAllCommunities(): Community[] {
-    const stored = localStorage.getItem(COMMUNITIES_KEY);
-    return stored ? JSON.parse(stored) : [];
+  static async getAllCommunities(): Promise<Community[]> {
+    const querySnapshot = await getDocs(collection(db, 'communities'));
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Community));
   }
 
-  static saveCommunities(communities: Community[]): void {
-    localStorage.setItem(COMMUNITIES_KEY, JSON.stringify(communities));
-  }
-
-  static createCommunity(name: string, description: string, creatorId: string, tokenContribution: number): Community {
-    const communities = this.getAllCommunities();
+  static async createCommunity(name: string, description: string, creatorId: string, tokenContribution: number): Promise<Community> {
+    const communities = await this.getAllCommunities();
     
     if (communities.some(c => c.name.toLowerCase() === name.toLowerCase())) {
       throw new Error('Community name already exists');
     }
 
-    const community: Community = {
-      id: 'COM' + Date.now().toString(36).toUpperCase(),
+    const communityData = {
       name,
       description,
       createdBy: creatorId,
@@ -55,151 +61,162 @@ export class CommunityService {
       isActive: true
     };
 
-    communities.push(community);
-    this.saveCommunities(communities);
-    return community;
+    const docRef = await addDoc(collection(db, 'communities'), communityData);
+    return { id: docRef.id, ...communityData };
   }
 
-  static searchCommunities(query: string): Community[] {
-    const communities = this.getAllCommunities();
+  static async searchCommunities(query: string): Promise<Community[]> {
+    const communities = await this.getAllCommunities();
     return communities.filter(c => 
       c.name.toLowerCase().includes(query.toLowerCase()) ||
       c.id.toLowerCase().includes(query.toLowerCase())
     );
   }
 
-  static requestToJoin(communityId: string, userId: string): void {
-    const communities = this.getAllCommunities();
-    const community = communities.find(c => c.id === communityId);
+  static async requestToJoin(communityId: string, userId: string): Promise<void> {
+    const communityRef = doc(db, 'communities', communityId);
+    const communityDoc = await getDoc(communityRef);
     
-    if (!community) throw new Error('Community not found');
+    if (!communityDoc.exists()) throw new Error('Community not found');
+    
+    const community = communityDoc.data() as Community;
     if (community.members.includes(userId)) throw new Error('Already a member');
     if (community.pendingRequests.includes(userId)) throw new Error('Request already pending');
 
-    community.pendingRequests.push(userId);
-    this.saveCommunities(communities);
+    await updateDoc(communityRef, {
+      pendingRequests: arrayUnion(userId)
+    });
   }
 
-  static approveJoinRequest(communityId: string, userId: string, adminId: string): void {
-    const communities = this.getAllCommunities();
-    const community = communities.find(c => c.id === communityId);
+  static async approveJoinRequest(communityId: string, userId: string, adminId: string): Promise<void> {
+    const communityRef = doc(db, 'communities', communityId);
+    const communityDoc = await getDoc(communityRef);
     
-    if (!community) throw new Error('Community not found');
+    if (!communityDoc.exists()) throw new Error('Community not found');
+    
+    const community = communityDoc.data() as Community;
     if (!community.admins.includes(adminId)) throw new Error('Not authorized');
 
-    community.pendingRequests = community.pendingRequests.filter(id => id !== userId);
-    community.members.push(userId);
-    this.saveCommunities(communities);
+    await updateDoc(communityRef, {
+      pendingRequests: arrayRemove(userId),
+      members: arrayUnion(userId)
+    });
   }
 
-  static declineJoinRequest(communityId: string, userId: string, adminId: string): void {
-    const communities = this.getAllCommunities();
-    const community = communities.find(c => c.id === communityId);
+  static async declineJoinRequest(communityId: string, userId: string, adminId: string): Promise<void> {
+    const communityRef = doc(db, 'communities', communityId);
+    const communityDoc = await getDoc(communityRef);
     
-    if (!community) throw new Error('Community not found');
+    if (!communityDoc.exists()) throw new Error('Community not found');
+    
+    const community = communityDoc.data() as Community;
     if (!community.admins.includes(adminId)) throw new Error('Not authorized');
 
-    community.pendingRequests = community.pendingRequests.filter(id => id !== userId);
-    this.saveCommunities(communities);
+    await updateDoc(communityRef, {
+      pendingRequests: arrayRemove(userId)
+    });
   }
 
-  static makeAdmin(communityId: string, userId: string, adminId: string): void {
-    const communities = this.getAllCommunities();
-    const community = communities.find(c => c.id === communityId);
+  static async makeAdmin(communityId: string, userId: string, adminId: string): Promise<void> {
+    const communityRef = doc(db, 'communities', communityId);
+    const communityDoc = await getDoc(communityRef);
     
-    if (!community) throw new Error('Community not found');
+    if (!communityDoc.exists()) throw new Error('Community not found');
+    
+    const community = communityDoc.data() as Community;
     if (!community.admins.includes(adminId)) throw new Error('Not authorized');
     if (!community.members.includes(userId)) throw new Error('User not a member');
 
     if (!community.admins.includes(userId)) {
-      community.admins.push(userId);
-      this.saveCommunities(communities);
+      await updateDoc(communityRef, {
+        admins: arrayUnion(userId)
+      });
     }
   }
 
-  static updateTokenContribution(communityId: string, amount: number, adminId: string): void {
-    const communities = this.getAllCommunities();
-    const community = communities.find(c => c.id === communityId);
+  static async updateTokenContribution(communityId: string, amount: number, adminId: string): Promise<void> {
+    const communityRef = doc(db, 'communities', communityId);
+    const communityDoc = await getDoc(communityRef);
     
-    if (!community) throw new Error('Community not found');
+    if (!communityDoc.exists()) throw new Error('Community not found');
+    
+    const community = communityDoc.data() as Community;
     if (!community.admins.includes(adminId)) throw new Error('Not authorized');
 
-    community.tokenContribution = amount;
-    this.saveCommunities(communities);
+    await updateDoc(communityRef, {
+      tokenContribution: amount
+    });
   }
 
-  static getUserCommunities(userId: string): Community[] {
-    const communities = this.getAllCommunities();
+  static async getUserCommunities(userId: string): Promise<Community[]> {
+    const communities = await this.getAllCommunities();
     return communities.filter(c => c.members.includes(userId));
   }
 
-  static createSupportRequest(communityId: string, requesterId: string, amount: number, reason: string): void {
-    const community = this.getAllCommunities().find(c => c.id === communityId);
-    if (!community) throw new Error('Community not found');
+  static async createSupportRequest(communityId: string, requesterId: string, amount: number, reason: string): Promise<void> {
+    const communityDoc = await getDoc(doc(db, 'communities', communityId));
+    if (!communityDoc.exists()) throw new Error('Community not found');
+    
+    const community = communityDoc.data() as Community;
     if (!community.members.includes(requesterId)) throw new Error('Not a member');
 
-    const requests = this.getAllSupportRequests();
-    const request: SupportRequest = {
-      id: 'REQ' + Date.now().toString(36).toUpperCase(),
+    const requestData = {
       communityId,
       requesterId,
       amount,
       reason,
       createdAt: new Date().toISOString(),
-      status: 'pending',
+      status: 'pending' as const,
       contributors: []
     };
 
-    requests.push(request);
-    this.saveSupportRequests(requests);
-
-    // Auto-process after 10 minutes
-    setTimeout(() => this.processSupportRequest(request.id), 10 * 60 * 1000);
-  }
-
-  static getAllSupportRequests(): SupportRequest[] {
-    const stored = localStorage.getItem(SUPPORT_REQUESTS_KEY);
-    return stored ? JSON.parse(stored) : [];
-  }
-
-  static saveSupportRequests(requests: SupportRequest[]): void {
-    localStorage.setItem(SUPPORT_REQUESTS_KEY, JSON.stringify(requests));
-  }
-
-  static processSupportRequest(requestId: string): void {
-    const requests = this.getAllSupportRequests();
-    const request = requests.find(r => r.id === requestId);
+    const docRef = await addDoc(collection(db, 'supportRequests'), requestData);
     
-    if (!request || request.status !== 'pending') return;
+    // Auto-process after 10 minutes
+    setTimeout(() => this.processSupportRequest(docRef.id), 10 * 60 * 1000);
+  }
 
-    const community = this.getAllCommunities().find(c => c.id === request.communityId);
-    if (!community) return;
+  static async getAllSupportRequests(): Promise<SupportRequest[]> {
+    const querySnapshot = await getDocs(collection(db, 'supportRequests'));
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SupportRequest));
+  }
+
+  static async processSupportRequest(requestId: string): Promise<void> {
+    const requestRef = doc(db, 'supportRequests', requestId);
+    const requestDoc = await getDoc(requestRef);
+    
+    if (!requestDoc.exists()) return;
+    
+    const request = requestDoc.data() as SupportRequest;
+    if (request.status !== 'pending') return;
+
+    const communityDoc = await getDoc(doc(db, 'communities', request.communityId));
+    if (!communityDoc.exists()) return;
+    
+    const community = communityDoc.data() as Community;
 
     // Deduct tokens from all members
-    community.members.forEach(memberId => {
-      if (memberId !== request.requesterId) {
+    const contributors = community.members
+      .filter(memberId => memberId !== request.requesterId)
+      .map(memberId => {
         this.deductTokens(memberId, community.tokenContribution);
-        request.contributors.push({
-          userId: memberId,
-          amount: community.tokenContribution
-        });
-      }
-    });
+        return { userId: memberId, amount: community.tokenContribution };
+      });
 
     // Add tokens to requester
     this.addTokens(request.requesterId, request.amount);
-    request.status = 'completed';
     
-    this.saveSupportRequests(requests);
+    await updateDoc(requestRef, {
+      status: 'completed',
+      contributors
+    });
   }
 
   private static deductTokens(userId: string, amount: number): void {
-    // Integration with UserDataService would go here
     console.log(`Deducting ${amount} tokens from user ${userId}`);
   }
 
   private static addTokens(userId: string, amount: number): void {
-    // Integration with UserDataService would go here
     console.log(`Adding ${amount} tokens to user ${userId}`);
   }
 }
