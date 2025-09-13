@@ -155,6 +155,7 @@ export const CommunitiesManager = () => {
             placeholder="Enter community name" 
             value={formData.name}
             onChange={(e) => setFormData({...formData, name: e.target.value})}
+            className="border-2 border-gray-300 placeholder:text-gray-400"
           />
         </div>
         <div>
@@ -163,6 +164,7 @@ export const CommunitiesManager = () => {
             placeholder="Describe your community's purpose" 
             value={formData.description}
             onChange={(e) => setFormData({...formData, description: e.target.value})}
+            className="border-2 border-gray-300 placeholder:text-gray-400"
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -172,6 +174,7 @@ export const CommunitiesManager = () => {
               placeholder="City, County" 
               value={formData.location}
               onChange={(e) => setFormData({...formData, location: e.target.value})}
+              className="border-2 border-gray-300 placeholder:text-gray-400"
             />
           </div>
           <div>
@@ -181,6 +184,7 @@ export const CommunitiesManager = () => {
               placeholder="100" 
               value={formData.maxMembers}
               onChange={(e) => setFormData({...formData, maxMembers: parseInt(e.target.value) || 100})}
+              className="border-2 border-gray-300 placeholder:text-gray-400"
             />
           </div>
         </div>
@@ -257,7 +261,7 @@ export const CommunitiesManager = () => {
                 placeholder="Search communities by name, location, or category..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 border-2 border-gray-300 placeholder:text-gray-400"
               />
             </div>
           </div>
