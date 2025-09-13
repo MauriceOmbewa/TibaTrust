@@ -18,9 +18,9 @@ export const AdminPanel = ({ userId, adminCommunities, onUpdate }: AdminPanelPro
   const [newTokenAmount, setNewTokenAmount] = useState<number>(50);
   const { toast } = useToast();
 
-  const handleApproveRequest = (communityId: string, requestUserId: string) => {
+  const handleApproveRequest = async (communityId: string, requestUserId: string) => {
     try {
-      CommunityService.approveJoinRequest(communityId, requestUserId, userId);
+      await CommunityService.approveJoinRequest(communityId, requestUserId, userId);
       toast({ title: 'Success', description: 'Join request approved!' });
       onUpdate();
     } catch (error: any) {
@@ -28,9 +28,9 @@ export const AdminPanel = ({ userId, adminCommunities, onUpdate }: AdminPanelPro
     }
   };
 
-  const handleDeclineRequest = (communityId: string, requestUserId: string) => {
+  const handleDeclineRequest = async (communityId: string, requestUserId: string) => {
     try {
-      CommunityService.declineJoinRequest(communityId, requestUserId, userId);
+      await CommunityService.declineJoinRequest(communityId, requestUserId, userId);
       toast({ title: 'Success', description: 'Join request declined' });
       onUpdate();
     } catch (error: any) {
@@ -38,9 +38,9 @@ export const AdminPanel = ({ userId, adminCommunities, onUpdate }: AdminPanelPro
     }
   };
 
-  const handleMakeAdmin = (communityId: string, memberId: string) => {
+  const handleMakeAdmin = async (communityId: string, memberId: string) => {
     try {
-      CommunityService.makeAdmin(communityId, memberId, userId);
+      await CommunityService.makeAdmin(communityId, memberId, userId);
       toast({ title: 'Success', description: 'User promoted to admin!' });
       onUpdate();
     } catch (error: any) {
@@ -48,9 +48,9 @@ export const AdminPanel = ({ userId, adminCommunities, onUpdate }: AdminPanelPro
     }
   };
 
-  const handleUpdateTokens = (communityId: string) => {
+  const handleUpdateTokens = async (communityId: string) => {
     try {
-      CommunityService.updateTokenContribution(communityId, newTokenAmount, userId);
+      await CommunityService.updateTokenContribution(communityId, newTokenAmount, userId);
       toast({ title: 'Success', description: 'Token contribution updated!' });
       onUpdate();
     } catch (error: any) {
