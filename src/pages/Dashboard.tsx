@@ -13,6 +13,7 @@ import { WalletPayment } from '@/components/payment/WalletPayment';
 import { TransactionMonitor } from '@/components/payment/TransactionMonitor';
 import { WalletConnector } from '@/components/auth/WalletConnector';
 import { UserDataService } from '@/services/userDataService';
+import { CommunitiesManager } from '@/components/communities/CommunitiesManager';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import UserSearch from '@/components/dashboard/UserSearch';
@@ -226,9 +227,7 @@ const Dashboard = () => {
         );
 
       case 'communities':
-        return (
-          <CommunityManager userId={userId} />
-        );
+        return <CommunitiesManager />;
 
       case 'tokens':
         return (
