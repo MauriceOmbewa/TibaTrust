@@ -13,8 +13,8 @@ export const CommunityManager = ({ userId }: CommunityManagerProps) => {
   const [userCommunities, setUserCommunities] = useState<any[]>([]);
   const [adminCommunities, setAdminCommunities] = useState<any[]>([]);
 
-  const loadUserCommunities = () => {
-    const communities = CommunityService.getUserCommunities(userId);
+  const loadUserCommunities = async () => {
+    const communities = await CommunityService.getUserCommunities(userId);
     setUserCommunities(communities);
     setAdminCommunities(communities.filter(c => c.admins.includes(userId)));
   };
