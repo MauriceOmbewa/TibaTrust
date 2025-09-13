@@ -19,12 +19,12 @@ export const CommunityList = ({ userId, userCommunities, onUpdate }: CommunityLi
   const [isSearching, setIsSearching] = useState(false);
   const { toast } = useToast();
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     
     setIsSearching(true);
     try {
-      const results = CommunityService.searchCommunities(searchQuery);
+      const results = await CommunityService.searchCommunities(searchQuery);
       setSearchResults(results);
     } catch (error) {
       toast({ title: 'Error', description: 'Search failed', variant: 'destructive' });
@@ -33,9 +33,9 @@ export const CommunityList = ({ userId, userCommunities, onUpdate }: CommunityLi
     }
   };
 
-  const handleJoinRequest = (communityId: string) => {
+  const handleJoinRequest = async (communityId: string) => {
     try {
-      CommunityService.requestToJoin(communityId, userId);
+      await CommunityService.requestToJoin(communityId, userId);
       toast({ title: 'Success', description: 'Join request sent!' });
       onUpdate();
     } catch (error: any) {
