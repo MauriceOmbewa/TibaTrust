@@ -166,7 +166,7 @@ const Dashboard = () => {
                   <CheckCircle className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{CommunityService.getUserCommunities(userId).length}</div>
+                  <div className="text-2xl font-bold">0</div>
                   <p className="text-xs text-muted-foreground">Joined</p>
                 </CardContent>
               </Card>
