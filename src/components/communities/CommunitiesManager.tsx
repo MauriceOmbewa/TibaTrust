@@ -142,7 +142,7 @@ export const CommunitiesManager = () => {
     </Card>
   );
 
-  const CreateCommunityForm = () => (
+  const createCommunityForm = (
     <Card>
       <CardHeader>
         <CardTitle>Create New Community</CardTitle>
@@ -213,7 +213,7 @@ export const CommunitiesManager = () => {
         </Button>
       </div>
 
-      {showCreateForm && <CreateCommunityForm />}
+      {showCreateForm && createCommunityForm}
 
       <Tabs defaultValue="my-communities" className="space-y-4">
         <TabsList className="grid w-full grid-cols-2">
