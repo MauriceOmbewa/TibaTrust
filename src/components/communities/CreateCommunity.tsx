@@ -26,7 +26,7 @@ export const CreateCommunity = ({ userId, onCommunityCreated }: CreateCommunityP
 
     setIsCreating(true);
     try {
-      const community = CommunityService.createCommunity(name, description, userId, tokenContribution);
+      const community = await CommunityService.createCommunity(name, description, userId, tokenContribution);
       toast({ title: 'Success', description: `Community "${community.name}" created successfully!` });
       setName('');
       setDescription('');
