@@ -15,14 +15,17 @@ export const CommunitiesManager = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [communities, setCommunities] = useState<CommunityWithStatus[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const [formData, setFormData] = useState({ name: '', description: '', location: '', category: 'Regional', maxMembers: 100 });
   const { user } = useApp();
   const { toast } = useToast();
 
   useEffect(() => {
-    loadCommunities();
-  }, [user]);
+    if (user && !hasLoaded) {
+      loadCommunities();
+    }
+  }, [user, hasLoaded]);
 
   const loadCommunities = async () => {
     if (!user) return;
@@ -30,8 +33,10 @@ export const CommunitiesManager = () => {
       setLoading(true);
       const data = await CommunityService.getCommunitiesWithStatus(user.id);
       setCommunities(data);
+      setHasLoaded(true);
     } catch (error) {
       console.error('Failed to load communities:', error);
+      toast({ title: 'Error', description: 'Failed to load communities', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -227,8 +232,11 @@ export const CommunitiesManager = () => {
 
         <TabsContent value="my-communities" className="space-y-4">
           {loading ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin" />
+            <div className="flex justify-center py-8">
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span className="text-sm text-muted-foreground">Loading communities...</span>
+              </div>
             </div>
           ) : myCommunities.length === 0 ? (
             <Card>
@@ -267,8 +275,11 @@ export const CommunitiesManager = () => {
           </div>
 
           {loading ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin" />
+            <div className="flex justify-center py-8">
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span className="text-sm text-muted-foreground">Loading communities...</span>
+              </div>
             </div>
           ) : filteredAvailable.length === 0 ? (
             <Card>
